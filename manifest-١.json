@@ -1,0 +1,39 @@
+{
+  "background_color": "#2e7c72",
+  "dir": "auto",
+  "display": "standalone",
+  "name": "هانو للإعلان والتسويق",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Hano.adv",
+  "start_url": "https://selr7d-d51bpbccz-intelligence-agentic-models.vercel.app/",
+  "theme_color": "#fdfbfb",
+  "icons": [
+    {
+      "src": "https://selr7d-d51bpbccz-intelligence-agentic-models.vercel.app/favicon.ico",
+      "type": "image/x-icon",
+      "isSquare": false,
+      "isPng": false,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 0,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    },
+    {
+      "src": "https://selr7d-d51bpbccz-intelligence-agentic-models.vercel.app/favicon.ico",
+      "type": "image/x-icon",
+      "isSquare": false,
+      "isPng": false,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 0,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    }
+  ],
+  "lang": "ar",
+  "id": "https://agentic-models.vercel.app/"
+}
