@@ -177,6 +177,7 @@ export default function InvoiceDetailScreen() {
       ['الفترة', `${invoice.periodStart} → ${invoice.periodEnd}`],
       ['تاريخ الإصدار', invoice.issueDate],
       ['تاريخ الاستحقاق', invoice.dueDate],
+فاتورة ضريبية
       [],
       ['#', 'البيان', 'التاريخ', 'الكمية', 'الوحدة', 'سعر الوحدة', 'الإجمالي'],
       ...items.map((w, idx) => [idx + 1, w.type, w.date, w.quantity, w.unit, w.unitPrice, workTotal(w)]),
@@ -259,12 +260,12 @@ export default function InvoiceDetailScreen() {
   return (
     <Screen>
       <ScreenHeader
-        title="فاتورة ضريبية"
+        title="فاتورة"
         subtitle={`${invoice.number} • ${company?.name ?? 'عميل'}`}
         onBack={() => nav.goBack()}
         right={<Badge label={overdueDays ? `متأخرة ${overdueDays} يوم` : STATUS_LABELS[invoice.status]} tone={overdueDays ? 'danger' : statusTone(invoice.status)} />}
       />
-      <ScrollView contentContainerStyle={{ padding: SPACING.lg, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
+مبيعات      <ScrollView contentContainerStyle={{ padding: SPACING.lg, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
         <Card style={{ marginBottom: SPACING.lg, backgroundColor: c.primarySoft, borderColor: c.primarySoft }}>
           <View style={{ flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ flex: 1, flexShrink: 1 }}>
