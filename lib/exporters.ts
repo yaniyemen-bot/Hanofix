@@ -280,8 +280,8 @@ export function buildInvoiceHtml(
 <style>
   * { box-sizing: border-box; }
   body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: #0f172a; margin: 0; padding: 24px; background: #fff; }
-  .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #0f766e; padding-bottom: 14px; }
-  h1 { font-size: 22px; margin: 0 0 6px; color: #0f766e; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #524C6B; padding-bottom: 14px; }
+  h1 { font-size: 22px; margin: 0 0 6px; color: #524C6B; }
   .biz { font-size: 15px; font-weight: 700; }
   .muted { color: #64748b; font-size: 12px; line-height: 1.7; }
   .num { font-size: 13px; background: #f1f5f9; padding: 8px 12px; border-radius: 8px; }
@@ -289,12 +289,12 @@ export function buildInvoiceHtml(
   .meta { display: flex; gap: 26px; flex-wrap: wrap; margin-bottom: 16px; font-size: 13px; }
   .meta b { display: block; color: #64748b; font-weight: 600; font-size: 11px; margin-bottom: 3px; }
   table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  th { background: #0f766e; color: #fff; padding: 9px 6px; text-align: right; font-size: 11px; }
+  th { background: #524C6B; color: #fff; padding: 9px 6px; text-align: right; font-size: 11px; }
   td { padding: 8px 6px; border-bottom: 1px solid #e2e8f0; }
   td.c, th.c { text-align: center; }
   .totals { margin-top: 14px; margin-inline-start: auto; width: 320px; font-size: 13px; }
   .totals div { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #e2e8f0; }
-  .grand { background: #0f766e; color: #fff; border-radius: 8px; padding: 10px 12px !important; font-weight: 700; border: none !important; margin-top: 8px; }
+  .grand { background: #524C6B; color: #fff; border-radius: 8px; padding: 10px 12px !important; font-weight: 700; border: none !important; margin-top: 8px; }
   .notes { margin-top: 20px; font-size: 12px; color: #475569; background: #f8fafc; padding: 12px; border-radius: 8px; }
   .foot { margin-top: 26px; text-align: center; font-size: 11px; color: #94a3b8; }
 </style>
@@ -376,7 +376,7 @@ export function voucherKindLabel(voucher: Voucher): string {
 
 export function buildVoucherHtml(voucher: Voucher, settings: Settings, currency: CurrencySettings): string {
   const isReceipt = voucher.type === 'receipt';
-  const accent = isReceipt ? '#0f766e' : '#b91c1c';
+  const accent = isReceipt ? '#524C6B' : '#b91c1c';
   return `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
