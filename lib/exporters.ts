@@ -302,7 +302,7 @@ export function buildInvoiceHtml(
 <body>
   <div class="head">
     <div>
-      <h1>فاتورة ضريبية</h1>
+      <div style="display:flex;align-items:center;gap:12px;"><img src="/logo.png" style="height:45px;width:auto;object-fit:contain;" /><h1>فاتورة مبيعات</h1></div>
       <div class="biz">${escapeHtml(settings.businessName)}</div>
       <div class="muted">${escapeHtml(settings.address)}<br/>هاتف: ${escapeHtml(settings.phone)}<br/>الرقم الضريبي: ${escapeHtml(settings.taxNumber)}</div>
     </div>
@@ -353,7 +353,7 @@ export function buildInvoiceShareText(
   return [
     `*${settings.businessName}*`,
     responsibleName ? `المسؤول: ${responsibleName}` : '',
-    `فاتورة ضريبية: ${invoice.number}`,
+    `فاتورة مبيعات: ${invoice.number}`,
     `العميل: ${company?.name || '—'}`,
     `الفترة: ${formatDateShort(invoice.periodStart)} → ${formatDateShort(invoice.periodEnd)}`,
     `تاريخ الاستحقاق: ${formatDateShort(invoice.dueDate)}`,

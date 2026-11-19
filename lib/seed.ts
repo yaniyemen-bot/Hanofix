@@ -39,7 +39,7 @@ const COMPANIES_SEED: Omit<Company, 'id' | 'createdAt'>[] = [
     address: 'جدة - حي الروضة - طريق الملك عبدالعزيز',
     email: 'accounts@modern-build.sa',
     taxNumber: '3009876543210003',
-    notes: 'يطلب فاتورة ضريبية مع كل دفعة',
+    notes: 'يطلب فاتورة مبيعات مع كل دفعة',
   },
   {
     name: 'شركة الإعمار الخليجية',
