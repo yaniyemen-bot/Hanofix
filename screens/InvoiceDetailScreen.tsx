@@ -177,7 +177,7 @@ export default function InvoiceDetailScreen() {
       ['الفترة', `${invoice.periodStart} → ${invoice.periodEnd}`],
       ['تاريخ الإصدار', invoice.issueDate],
       ['تاريخ الاستحقاق', invoice.dueDate],
-فاتورة ضريبية
+      ['نوع الفاتورة', 'فاتورة مبيعات'],
       [],
       ['#', 'البيان', 'التاريخ', 'الكمية', 'الوحدة', 'سعر الوحدة', 'الإجمالي'],
       ...items.map((w, idx) => [idx + 1, w.type, w.date, w.quantity, w.unit, w.unitPrice, workTotal(w)]),
