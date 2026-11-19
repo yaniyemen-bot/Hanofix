@@ -1,3 +1,4 @@
+import { Image } from "react-native";
 import React, { useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -74,7 +75,7 @@ export default function HomeScreen() {
       <LinearGradient colors={settings.businessName ? c.headerGradient : c.headerGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl, paddingBottom: SPACING.xxl, borderBottomLeftRadius: RADIUS.xl, borderBottomRightRadius: RADIUS.xl }}>
         <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: SPACING.md }}>
           <View style={{ width: 46, height: 46, borderRadius: RADIUS.lg, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name="business" size={22} color="#fff" />
+            <Image source={require("../assets/logo.png")} style={{ width: 42, height: 28 }} resizeMode="contain" />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[rtlText, { color: 'rgba(255,255,255,0.8)', fontSize: 12.5, fontWeight: '600' }]}>
