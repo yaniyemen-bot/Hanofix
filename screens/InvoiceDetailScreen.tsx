@@ -260,7 +260,7 @@ export default function InvoiceDetailScreen() {
   return (
     <Screen>
       <ScreenHeader
-        title="فاتورة"
+    title="فاتورة مبيعات"
         subtitle={`${invoice.number} • ${company?.name ?? 'عميل'}`}
         onBack={() => nav.goBack()}
         right={<Badge label={overdueDays ? `متأخرة ${overdueDays} يوم` : STATUS_LABELS[invoice.status]} tone={overdueDays ? 'danger' : statusTone(invoice.status)} />}
