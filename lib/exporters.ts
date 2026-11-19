@@ -276,7 +276,7 @@ export function buildInvoiceHtml(
 <html dir="rtl" lang="ar">
 <head>
 <meta charset="utf-8">
-<title>فاتورة ${escapeHtml(invoice.number)}</title>
+<title>فاتورة مبيعات  ${escapeHtml(invoice.number)}</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: #0f172a; margin: 0; padding: 24px; background: #fff; }
