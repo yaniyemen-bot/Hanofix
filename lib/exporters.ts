@@ -168,12 +168,6 @@ export async function printHtml(html: string): Promise<boolean> {
   }
   try { await Print.printAsync({ html }); return true; } catch { return false; }
 }
-  try {
-    await Print.printAsync({ html });
-    return true;
-  } catch {
-    return false;
-  }
 
 export async function savePdfNative(html: string, filename: string): Promise<string | null> {
   if (isWeb) return null;
