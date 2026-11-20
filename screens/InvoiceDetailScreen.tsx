@@ -28,7 +28,7 @@ import {
   exportCsv,
   exportExcel,
   exportMetaRows,
-  (typeof window !== 'undefined'),
+  isWeb,
   printHtml,
   safeFileName,
   savePdfNative,
@@ -114,11 +114,11 @@ export default function InvoiceDetailScreen() {
     setBusy('print');
     const ok = await printHtml(html());
     setBusy(null);
-    showToast(ok ? ((typeof window !== 'undefined') ? 'تم فتح نافذة الطباعة / PDF' : 'تم فتح نافذة الطباعة') : 'تعذر فتح الطباعة', ok ? 'success' : 'error');
+    showToast(ok ? (isWeb ? 'تم فتح نافذة الطباعة / PDF' : 'تم فتح نافذة الطباعة') : 'تعذر فتح الطباعة', ok ? 'success' : 'error');
   };
 
   const doPdf = async () => {
-    if ((typeof window !== 'undefined')) {
+    if (isWeb) {
       await doPrint();
       return;
     }
@@ -420,7 +420,7 @@ export default function InvoiceDetailScreen() {
 
         <ActionDropdown label="خيارات الفاتورة والتصدير" items={[
   { label: "طباعة / حفظ PDF", sub: "طباعة الفاتورة الرسمية أو حفظها PDF", icon: "print-outline", onPress: doPrint },
-  { label: "حفظ PDF على الجهاز", sub: "تصدير ملف PDF مباشر", icon: "document-outline", onPress: doPdf, hidden: (typeof window !== 'undefined') },
+  { label: "حفظ PDF على الجهاز", sub: "تصدير ملف PDF مباشر", icon: "document-outline", onPress: doPdf, hidden: isWeb },
   { label: "تصدير Excel (.xlsx)", sub: "فتح الفاتورة في جدول Excel", icon: "grid-outline", onPress: doExcel },
   { label: "تصدير CSV", sub: "ملف جدول بيانات", icon: "download-outline", onPress: doCsv },
   { label: "مشاركة نصية", sub: "نسخ أو إرسال ملخص الفاتورة", icon: "chatbox-ellipses-outline", onPress: doShare },
