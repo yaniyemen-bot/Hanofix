@@ -200,7 +200,6 @@ export default function VoucherDetailScreen() {
           { label: "حذف السند", sub: "حذف السند وإعادة احتساب الأرصدة", icon: "trash-outline", tone: "danger", onPress: () => { if (!can(role, "cash.delete")) { showToast("الدور الحالي لا يسمح بحذف السند", "error"); return; } setConfirmDelete(true); } },
         ]} />
         <Btn label="العودة لحركة الصندوق" icon="wallet-outline" variant="outline" onPress={() => nav.navigate("Cash")} />
-      </View>
     </ScrollView>
 
       <ConfirmDialog
