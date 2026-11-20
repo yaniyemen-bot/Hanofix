@@ -34,16 +34,14 @@
     },
     "extra": {
       "eas": {
-        "projectId": "552f0665-e30d-4f11-9ea9-97bc22a22809"
+        "projectId": "28667ca8-c5a0-45fd-811e-c66d4bae9ae3"
       }
     },
-    "updates": {
-      "url": "https://u.expo.dev/552f0665-e30d-4f11-9ea9-97bc22a22809"
-    },
+    "updates": {},
     "runtimeVersion": {
       "policy": "appVersion"
     },
-    "owner": "arcadalabs",
+    "owner": "yaniyemen",
     "platforms": [
       "ios",
       "android",
