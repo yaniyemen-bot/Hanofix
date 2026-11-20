@@ -1185,7 +1185,7 @@ export function usePaletteRef(): Palette {
 
 
 export function ActionDropdown({ label = "خيارات وإجراءات", items }: { label?: string; items: { label: string; sub?: string; icon?: any; tone?: "default" | "primary" | "danger"; onPress: () => void; hidden?: boolean }[] }) {
-  const c = useThemeColors();
+  const c = usePalette();
   const [open, setOpen] = React.useState(false);
   const list = items.filter((i) => !i.hidden);
   return (
