@@ -90,9 +90,8 @@ const dark: Palette = {
   inputBg: '#0F1829',
 };
 
-export function usePalette(): Palette {
-  const scheme = useColorScheme();
-  return scheme === 'dark' ? dark : light;
+export function usePalette() {
+  return light;
 }
 
 export const lightPalette = light;

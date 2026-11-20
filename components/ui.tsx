@@ -738,7 +738,7 @@ export function StatTile({
   };
   const t = tones[tone];
   return (
-    <Card onPress={onPress} style={{ flex: 1 }}>
+    <Card onPress={onPress} style={{ flex: 1, flexBasis: 0, minWidth: 0 }}>
       <View style={{ flexDirection: 'row-reverse', alignItems: 'flex-start', gap: 10 }}>
         <View
           style={{
