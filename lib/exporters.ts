@@ -417,3 +417,64 @@ export function buildVoucherHtml(voucher: Voucher, settings: Settings, currency:
     <div class="num" style="font-size:13px;color:#475569;line-height:1.6;"><b>رقم الفاتورة: ${escapeHtml(invoice.number)}</b><br/>الحالة: ${invoice.status === 'paid' ? 'مدفوعة' : invoice.status === 'issued' ? 'مستحقة' : 'مسودة'}</div>
   </div>
 </div>
+    <tr><td class="k">طريقة الدفع</td><td>${PAYMENT_METHOD_LABELS[voucher.method] ?? 'نقدًا'}</td></tr>
+    <tr><td class="k">المرجع</td><td>${escapeHtml(voucher.reference || '—')}</td></tr>
+    <tr><td class="k">المسؤول</td><td>${escapeHtml(voucher.createdBy || '—')}</td></tr>
+    ${voucher.notes ? `<tr><td class="k">ملاحظات</td><td>${escapeHtml(voucher.notes)}</td></tr>` : ''}
+  </table>
+  <div class="sign"><div>توقيع المستلم</div><div>توقيع المسؤول</div></div>
+  <div class="foot">${escapeHtml(settings.businessName)} • ${voucherKindLabel(voucher)} ${escapeHtml(voucher.number)}</div>
+</body>
+</html>`;
+}
+
+export function buildVoucherShareText(voucher: Voucher, settings: Settings, currency: CurrencySettings): string {
+  return [
+    `*${settings.businessName}*`,
+    `${voucherKindLabel(voucher)}: ${voucher.number}`,
+    `التاريخ: ${formatDateShort(voucher.date)}`,
+    voucher.type === 'receipt' ? `استلمنا من: ${voucher.partyName}` : `صرفنا إلى: ${voucher.partyName}`,
+    `المبلغ: ${formatMoney(voucher.amount, currency)}`,
+    `البيان: ${voucher.reason || '—'}`,
+    `طريقة الدفع: ${PAYMENT_METHOD_LABELS[voucher.method] ?? 'نقدًا'}`,
+    voucher.reference ? `المرجع: ${voucher.reference}` : '',
+    `المسؤول: ${voucher.createdBy || '—'}`,
+    voucher.notes ? `ملاحظات: ${voucher.notes}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+export function ledgerToRows(entries: LedgerEntry[], currency: CurrencySettings): (string | number)[][] {
+  return [
+    ['التاريخ', 'النوع', 'التصنيف', 'البيان', 'المبلغ', 'طريقة الدفع', 'المسؤول', 'العملة'],
+    ...entries.map((l) => [
+      l.date,
+      l.kind === 'income' ? 'إيراد' : 'مصروف',
+      l.category,
+      l.description,
+      l.amount,
+      PAYMENT_METHOD_LABELS[l.method] ?? 'نقدًا',
+      l.createdBy,
+      currency.code,
+    ]),
+  ];
+}
+
+export function vouchersToRows(vouchers: Voucher[], currency: CurrencySettings): (string | number)[][] {
+  return [
+    ['رقم السند', 'النوع', 'التاريخ', 'الطرف', 'البيان', 'المبلغ', 'طريقة الدفع', 'المرجع', 'المسؤول', 'العملة'],
+    ...vouchers.map((v) => [
+      v.number,
+      v.type === 'receipt' ? 'سند قبض' : 'سند صرف',
+      v.date,
+      v.partyName,
+      v.reason,
+      v.amount,
+      PAYMENT_METHOD_LABELS[v.method] ?? 'نقدًا',
+      v.reference,
+      v.createdBy,
+      currency.code,
+    ]),
+  ];
+}
