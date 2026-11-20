@@ -310,7 +310,7 @@ export function buildInvoiceHtml(
   </div>
   <div style="text-align:left;">
     <h1 style="margin:0 0 8px 0;color:#524C6B;font-size:24px;font-weight:800;">فاتورة مبيعات</h1>
-    <div class="num" style="font-size:13px;color:#475569;line-height:1.6;"><b>رقم الفاتورة: ${escapeHtml(invoice.number)}</b><br/>الحالة: ${invoice.status === "paid" ? "مدفوعة" : invoice.status === "issued" ? "مستحقة" : "مسودة"}</div>
+    <div class="num" style="font-size:13px;color:#475569;line-height:1.6;"><b>رقم الفاتورة: ${escapeHtml(invoice.number)}</b><br/>الحالة: ${invoice.status === 'paid' ? 'مدفوعة' : invoice.status === 'issued' ? 'مستحقة' : 'مسودة'}</div>
   </div>
 </div>
   <div class="body">
@@ -414,6 +414,6 @@ export function buildVoucherHtml(voucher: Voucher, settings: Settings, currency:
   </div>
   <div style="text-align:left;">
     <h1 style="margin:0 0 8px 0;color:#524C6B;font-size:24px;font-weight:800;">فاتورة مبيعات</h1>
-    <div class="num" style="font-size:13px;color:#475569;line-height:1.6;"><b>رقم الفاتورة: ${escapeHtml(invoice.number)}</b><br/>الحالة: ${invoice.status === "paid" ? "مدفوعة" : invoice.status === "issued" ? "مستحقة" : "مسودة"}</div>
+    <div class="num" style="font-size:13px;color:#475569;line-height:1.6;"><b>رقم الفاتورة: ${escapeHtml(invoice.number)}</b><br/>الحالة: ${invoice.status === 'paid' ? 'مدفوعة' : invoice.status === 'issued' ? 'مستحقة' : 'مسودة'}</div>
   </div>
 </div>
