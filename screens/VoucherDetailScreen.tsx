@@ -24,7 +24,7 @@ import {
   exportCsv,
   exportExcel,
   exportMetaRows,
-  isWeb,
+  (typeof window !== 'undefined'),
   printHtml,
   safeFileName,
   savePdfNative,
@@ -73,7 +73,7 @@ export default function VoucherDetailScreen() {
   };
 
   const doPdf = async () => {
-    if (isWeb) {
+    if ((typeof window !== 'undefined')) {
       await doPrint();
       return;
     }
@@ -173,7 +173,7 @@ export default function VoucherDetailScreen() {
 
         <ActionDropdown label="خيارات السند والتصدير" items={[
   { label: "طباعة / حفظ PDF", sub: "طباعة السند الرسمي بشعار الشركة", icon: "print-outline", onPress: doPrint },
-  { label: "حفظ PDF على الجهاز", sub: "تصدير ملف PDF مباشر", icon: "document-outline", onPress: doPdf, hidden: isWeb },
+  { label: "حفظ PDF على الجهاز", sub: "تصدير ملف PDF مباشر", icon: "document-outline", onPress: doPdf, hidden: (typeof window !== 'undefined') },
   { label: "تصدير Excel (.xlsx)", sub: "فتح السند في جدول Excel", icon: "grid-outline", onPress: doExcel },
   { label: "تصدير CSV", sub: "ملف جدول بيانات", icon: "download-outline", onPress: doCsv },
   { label: "مشاركة نصية", sub: "نسخ أو مشاركة تفاصيل السند", icon: "chatbox-ellipses-outline", onPress: doShare },
