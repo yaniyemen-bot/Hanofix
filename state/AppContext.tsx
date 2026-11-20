@@ -479,7 +479,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const next = { ...inv, paidAmount, remaining: round2(Math.max(0, inv.total - paidAmount)) };
         return { ...next, status: deriveInvoiceStatus(next) };
       }) : d.invoices;
-      const ledger = d.ledger.map((l) => l.voucherId === id ? { ...l, amount: amt, date: upd.date, note: patch.note ?? patch.notes ?? l.note } : l);
+      const ledger = d.ledger.map((l) => l.voucherId === id ? { ...l, amount: amt, date: upd.date, description: patch.note ?? patch.notes ?? (l as any).description } : l);
       return { ...d, vouchers: d.vouchers.map((v) => (v.id === id ? upd : v)), invoices, ledger };
     });
   }, []);
@@ -496,7 +496,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return { imported: count, type: "JSON" };
     }
     const lines = txt.split(/\r?\n/).filter(Boolean);
-    const parse = (l: string) => { const r: string[] = []; let cur = "", q = false; for (const ch of l) { if (ch === """) q = !q; else if (ch === "," && !q) { r.push(cur.trim()); cur = ""; } else cur += ch; } r.push(cur.trim()); return r; };
+    const parse = (l: string) => { const r: string[] = []; let cur = "", q = false; for (const ch of l) { if (ch === String.fromCharCode(34)) q = !q; else if (ch === "," && !q) { r.push(cur.trim()); cur = ""; } else cur += ch; } r.push(cur.trim()); return r; };
     const hi = lines.findIndex((l) => /الرقم|الاسم|المبلغ|رقم/.test(l));
     if (hi < 0 || hi >= lines.length - 1) return { imported: 0, type: "CSV" };
     const hdr = parse(lines[hi]);

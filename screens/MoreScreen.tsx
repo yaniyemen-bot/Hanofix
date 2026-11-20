@@ -1,5 +1,5 @@
 import * as DocumentPicker from "expo-document-picker";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import React, { useState } from 'react';
 import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -89,7 +89,7 @@ export default function MoreScreen() {
   };
 
   
-  const handleImportBackup = async () => { try { const r = await DocumentPicker.getDocumentAsync({ type: ["*/*"], copyToCacheDirectory: true }); if (r.canceled || !r.assets?.) return; const f = r.assets; const txt = await FileSystem.readAsStringAsync(f.uri, { encoding: FileSystem.EncodingType.UTF8 }); const out = importBackupData(txt, f.name); showToast(out.imported > 0 ? `تم استيراد ${out.imported} سجل (${out.type})` : "لم يتم العثور على بيانات", out.imported > 0 ? "success" : "error"); } catch { showToast("تعذر قراءة الملف", "error"); } };
+  const handleImportBackup = async () => { try { const r = await DocumentPicker.getDocumentAsync({ type: ["*/*"], copyToCacheDirectory: true }); if (r.canceled || !r.assets || !r.assets.length) return; const f = r.assets[0]; const txt = await FileSystem.readAsStringAsync(f.uri, { encoding: FileSystem.EncodingType.UTF8 }); const out = importBackupData(txt, f.name); showToast(out.imported > 0 ? `تم استيراد ${out.imported} سجل (${out.type})` : "لم يتم العثور على بيانات", out.imported > 0 ? "success" : "error"); } catch { showToast("تعذر قراءة الملف", "error"); } };
 
   return (
     <Screen scroll>
@@ -148,6 +148,7 @@ export default function MoreScreen() {
         {can(role, 'cash.view') ? (
           
         <MenuRow label="النسخ الاحتياطي" icon="cloud-download-outline" onPress={backup} hint="تنزيل نسخة من جميع الأعمال والفواتير والسندات (CSV)" />
+        ) : null}
       </Card>
 
       <SectionHeader title="الإعدادات" icon="settings-outline" />
@@ -186,18 +187,7 @@ export default function MoreScreen() {
         </View>
       </Card>
 
-      <ConfirmDialog
-        visible={confirmReset}
-        title="استعادة البيانات الافتراضية"
-        body="سيتم استبدال الشركات والأعمال والفواتير والسندات الحالية بالبيانات الافتراضية. لن تتغير إعدادات المنشأة والعملة والتسميات."
-        confirmLabel="استعادة"
-        onCancel={() => setConfirmReset(false)}
-        onConfirm={() => {
-          importBackupData();
-          setConfirmReset(false);
-          showToast('تمت استعادة البيانات الافتراضية', 'info');
-        }}
-      />
+      
     </Screen>
   );
 }

@@ -46,15 +46,16 @@ export default function VoucherDetailScreen() {
   const [editAmount, setEditAmount] = useState("");
   const [editDate, setEditDate] = useState("");
   const [editNote, setEditNote] = useState("");
+  const openEdit = () => { if (!can(role, "settings.edit")) { showToast("التعديل للمدير فقط", "error"); return; } setEditAmount(String(voucher.amount || "")); setEditDate(voucher.date || ""); setEditNote((voucher as any).note || (voucher as any).notes || ""); setEditOpen(true); };
+  const saveEdit = () => { const n = parseFloat(editAmount); if (!n || n <= 0) { showToast("أدخل مبلغاً صحيحاً", "error"); return; } updateVoucher(voucher.id, { amount: n, date: editDate.trim() || voucher.date, note: editNote.trim(), notes: editNote.trim() }); setEditOpen(false); showToast("تم تعديل السند وتحديث الأرصدة", "success"); };
+
   const [busy, setBusy] = useState<string | null>(null);
 
   const voucher = vouchers.find((v) => v.id === route.params?.voucherId);
 
   if (!voucher) {
     
-  const doPrint = async () => { setBusy("print"); try { await printHtml(buildVoucherHtml(voucher, settings, currency)); } finally { setBusy(null); } };
-  const openEdit = () => { if (role !== "admin" && !can(role, "settings.edit")) { showToast("التعديل للمدير فقط", "error"); return; } setEditAmount(String(voucher.amount || "")); setEditDate(voucher.date || ""); setEditNote((voucher as any).note || (voucher as any).notes || ""); setEditOpen(true); };
-  const saveEdit = () => { const n = parseFloat(editAmount); if (!n || n <= 0) { showToast("أدخل مبلغاً صحيحاً", "error"); return; } updateVoucher(voucher.id, { amount: n, date: editDate.trim() || voucher.date, note: editNote.trim(), notes: editNote.trim() }); setEditOpen(false); showToast("تم تعديل السند وتحديث الأرصدة", "success"); };
+  
 
   return (
       <Screen>
@@ -204,7 +205,7 @@ export default function VoucherDetailScreen() {
             }}
           />
           <Btn label="طباعة السند" icon="print-outline" variant="outline" loading={busy === "print"} onPress={doPrint} />
-          {(role === "admin" || can(role, "settings.edit")) ? <Btn label="تعديل السند" icon="create-outline" variant="outline" onPress={openEdit} /> : null}
+          {can(role, "settings.edit") ? <Btn label="تعديل السند" icon="create-outline" variant="outline" onPress={openEdit} /> : null}
           <Btn label="العودة لحركة الصندوق" icon="wallet-outline" variant="outline" onPress={() => nav.navigate('Cash')} />
         </View>
       </ScrollView>

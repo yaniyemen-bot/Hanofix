@@ -5,7 +5,7 @@ import { Linking, Platform, Share } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as Clipboard from 'expo-clipboard';
-import { File, Paths } from 'expo-file-system';
+import { File, Paths } from 'expo-file-system/legacy';
 import { escapeHtml, formatDate, formatDateShort, formatMoney, formatQuantity, toCsv } from './format';
 import { Company, CurrencySettings, Invoice, LedgerEntry, Settings, Voucher, Work } from './types';
 import { PAYMENT_METHOD_LABELS } from './format';
@@ -335,8 +335,7 @@ export function buildInvoiceHtml(
     </div>
   </div>
   <div style="text-align:left;">
-    <h1 style="margin:0 0 8px 0;color:#524C6B;font-size:24px;font-weight:800;">فاتورة مبيعات</h1>
-    <div class="num" style="font-size:13px;color:#475569;line-height:1.6;"><b>رقم الفاتورة: ${escapeHtml(invoice.number)}</b><br/>الحالة: ${invoice.status === 'paid' ? 'مدفوعة' : invoice.status === 'issued' ? 'مستحقة' : 'مسودة'}</div>
+    <h1 style="margin:0 0 8px 0;color:#524C6B;font-size:24px;font-weight:800;">سند ${voucher.type === 'payment' ? 'صرف' : 'قبض'}</h1><div class="num" style="font-size:13px;color:#475569;line-height:1.6;"><b>رقم السند: ${escapeHtml(voucher.number)}</b><br/>التاريخ: ${escapeHtml(voucher.date)}</div>
   </div>
 </div>
   <div class="body">
