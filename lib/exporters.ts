@@ -270,7 +270,7 @@ export function buildInvoiceHtml(
 <title>فاتورة مبيعات  ${escapeHtml(invoice.number)}</title>
 <style>
   * { box-sizing: border-box; }
-  body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: #0f172a; margin: 0; padding: 24px; background: #fff; }
+  @page { size: A4; margin: 12mm; } body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: #0f172a; margin: 0; padding: 24px; background: #fff; }
   .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #524C6B; padding-bottom: 14px; }
   h1 { font-size: 22px; margin: 0 0 6px; color: #524C6B; }
   .biz { font-size: 15px; font-weight: 700; }
@@ -377,7 +377,7 @@ export function buildVoucherHtml(voucher: Voucher, settings: Settings, currency:
 <meta charset="utf-8">
 <title>${voucherKindLabel(voucher)} ${escapeHtml(voucher.number)}</title>
 <style>
-  body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: #0f172a; margin: 0; padding: 26px; background: #fff; }
+  @page { size: A4; margin: 12mm; } body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: #0f172a; margin: 0; padding: 26px; background: #fff; }
   .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid ${accent}; padding-bottom: 14px; }
   h1 { font-size: 21px; margin: 0 0 6px; color: ${accent}; }
   .biz { font-size: 15px; font-weight: 700; }
