@@ -72,7 +72,7 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.primary} colors={[c.primary]} />}
     >
-      <LinearGradient colors={settings.businessName ? c.headerGradient : c.headerGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl, paddingBottom: SPACING.xl, borderBottomLeftRadius: RADIUS.xl, borderBottomRightRadius: RADIUS.xl }}>
+      <LinearGradient colors={settings.businessName ? c.headerGradient : c.headerGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl, paddingBottom: SPACING.xxl, borderBottomLeftRadius: RADIUS.xl, borderBottomRightRadius: RADIUS.xl }}>
         <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: SPACING.md }}>
           <View style={{ width: 46, height: 46, borderRadius: RADIUS.lg, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' }}>
             <Image source={require("../assets/logo.png")} style={{ width: 42, height: 28 }} resizeMode="contain" />
@@ -90,156 +90,20 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        </LinearGradient>
-
-      <View style={{ padding: SPACING.lg, marginTop: -SPACING.lg }}>
-        <View style={{ flexDirection: 'row-reverse', gap: SPACING.md }}>
-          <StatTile
-            title={`إيراد ${m.monthLabel}`}
-            value={formatMoney(m.monthRevenue, currency)}
-            icon="trending-up"
-            tone="primary"
-            subtitle={`${m.monthWorksCount} عمل مسجل`}
-            onPress={() => nav.navigate('WorksTab')}
-          />
-          <StatTile
-            title="عمل اليوم"
-            value={`${m.todayWorks.length}`}
-            icon="today"
-            tone="info"
-            subtitle={formatMoney(m.todayRevenue, currency)}
-            onPress={() => nav.navigate('WorksTab')}
-          />
+        <View style={{ flexDirection: 'row-reverse', gap: SPACING.sm, marginTop: SPACING.xl }}>
+          <QuickAction icon="add-circle" label="عمل يومي" onPress={() => nav.navigate('WorkForm')} />
+          {can(role, 'invoices.create') ? (
+            <QuickAction icon="document-text" label="فاتورة جديدة" onPress={() => nav.navigate('InvoiceNew')} />
+          ) : null}
+          {can(role, 'cash.view') ? (
+            <QuickAction icon="wallet" label={settings.labels.cash} onPress={() => nav.navigate('Cash')} />
+          ) : null}
+          <QuickAction icon="stats-chart" label={settings.labels.reports} onPress={() => (can(role, 'reports.view') ? nav.navigate('Reports') : showToast('دورك الحالي لا يسمح بعرض التقارير', 'error'))} />
+          <QuickAction icon="notifications" label={settings.labels.alerts} badge={alerts.filter((a) => a.severity !== 'info').length} onPress={() => nav.navigate('Alerts')} />
         </View>
-        <View style={{ flexDirection: 'row-reverse', gap: SPACING.md, marginTop: SPACING.md }}>
-          <StatTile
-            title="مستحقات غير مدفوعة"
-            value={formatMoney(m.outstandingTotal, currency)}
-            icon="wallet"
-            tone="warning"
-            subtitle={`${m.outstanding.length} فاتورة • محصّل ${formatMoney(m.collected, currency)}`}
-            onPress={() => nav.navigate('InvoicesTab')}
-          />
-          <StatTile
-            title="فواتير متأخرة"
-            value={`${m.overdue.length}`}
-            icon="alert-circle"
-            tone={m.overdue.length ? 'danger' : 'success'}
-            subtitle={formatMoney(m.overdueTotal, currency)}
-            onPress={() => nav.navigate('Alerts')}
-          />
-        </View>
+      </LinearGradient>
 
-        {can(role, 'cash.view') ? (
-          <View style={{ flexDirection: 'row-reverse', gap: SPACING.md, marginTop: SPACING.md }}>
-            <StatTile
-              title="رصيد الصندوق"
-              value={formatMoney(m.cashBalance, currency)}
-              icon="cash"
-              tone={m.cashBalance >= 0 ? 'success' : 'danger'}
-              subtitle={`${m.vouchersCount} سند • مقبوضات ${formatMoney(m.cashIn, currency)}`}
-              onPress={() => nav.navigate('Cash')}
-            />
-            <StatTile
-              title="مصروفات الشهر"
-              value={formatMoney(m.monthExpenses, currency)}
-              icon="trending-down"
-              tone="warning"
-              subtitle={`صافي الشهر ${formatMoney(m.monthNet, currency)}`}
-              onPress={() => nav.navigate('Reports')}
-            />
-          </View>
-        ) : null}
-
-        {settings.monthlyLimit > 0 ? (
-          <Card style={{ marginTop: SPACING.lg }}>
-            <View style={{ flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 8 }}>
-                <Ionicons name="speedometer-outline" size={17} color={m.limitUsedPct >= 100 ? c.danger : c.primary} />
-                <Text style={[rtlText, { color: c.text, fontSize: 14, fontWeight: '800' }]}>الحد المالي الشهري</Text>
-              </View>
-              <Badge
-                label={`${m.limitUsedPct}%`}
-                tone={m.limitUsedPct >= 100 ? 'danger' : m.limitUsedPct >= 80 ? 'warning' : 'primary'}
-              />
-            </View>
-            <ProgressBar value={m.limitUsedPct} tone={m.limitUsedPct >= 100 ? c.danger : m.limitUsedPct >= 80 ? c.warning : c.primary} />
-            <Text style={[rtlText, { color: c.textMuted, fontSize: 12, marginTop: 10 }]}>
-              {formatMoney(m.monthRevenue, currency)} من {formatMoney(settings.monthlyLimit, currency)}
-              {m.limitUsedPct >= 100 ? ' • تم تجاوز الحد المحدد' : ''}
-            </Text>
-          </Card>
-        ) : null}
-
-        {alerts.length > 0 ? (
-          <>
-            <SectionHeader title="تنبيهات تحتاج انتباهك" action="عرض الكل" onAction={() => nav.navigate('Alerts')} icon="notifications-outline" />
-            <Card>
-              {alerts.slice(0, 3).map((a, idx) => (
-                <View
-                  key={a.id}
-                  style={{
-                    flexDirection: 'row-reverse',
-                    gap: SPACING.md,
-                    paddingVertical: idx === 0 ? 0 : 12,
-                    borderTopWidth: idx === 0 ? 0 : 1,
-                    borderTopColor: c.borderSoft,
-                    alignItems: 'center',
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: RADIUS.md,
-                      backgroundColor: a.severity === 'danger' ? c.dangerSoft : a.severity === 'warning' ? c.warningSoft : c.infoSoft,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Ionicons
-                      name={a.severity === 'danger' ? 'warning' : a.severity === 'warning' ? 'time' : 'information-circle'}
-                      size={16}
-                      color={a.severity === 'danger' ? c.danger : a.severity === 'warning' ? c.warning : c.info}
-                    />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[rtlText, { color: c.text, fontSize: 13.5, fontWeight: '700' }]} numberOfLines={1}>
-                      {a.title}
-                    </Text>
-                    <Text style={[rtlText, { color: c.textMuted, fontSize: 11.5, marginTop: 2 }]} numberOfLines={1}>
-                      {a.body}
-                    </Text>
-                  </View>
-                  {a.invoiceId ? (
-                    <Ionicons
-                      name="chevron-back"
-                      size={16}
-                      color={c.textFaint}
-                      onPress={() => nav.navigate('InvoiceDetail', { invoiceId: a.invoiceId })}
-                    />
-                  ) : null}
-                </View>
-              ))}
-            </Card>
-          </>
-        ) : null}
-
-        <SectionHeader title="إيراد آخر 6 أشهر" action={settings.labels.reports} onAction={() => nav.navigate('Reports')} icon="bar-chart-outline" />
-        <Card>
-          <BarChart data={chartData} formatValue={compactMoney} height={150} />
-          <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', marginTop: SPACING.lg, paddingTop: SPACING.md, borderTopWidth: 1, borderTopColor: c.borderSoft }}>
-            <View>
-              <Text style={[rtlText, { color: c.textFaint, fontSize: 11.5 }]}>إجمالي 6 أشهر</Text>
-              <Text style={[rtlText, { color: c.text, fontSize: 15, fontWeight: '800', marginTop: 2 }]}>
-                {formatMoney(m.series.reduce((s, x) => s + x.value, 0), currency)}
-              </Text>
-            </View>
-            <View>
-              <Text style={[rtlText, { color: c.textFaint, fontSize: 11.5 }]}>نسبة التحصيل</Text>
-              <Text style={[rtlText, { color: c.success, fontSize: 15, fontWeight: '800', marginTop: 2 }]}>{m.collectionRate}%</Text>
-            </View>
-          </View>
+      <View style={{ paddingHorizontal: SPACING.lg, marginTop: SPACING.md }}>
         </Card>
 
         <SectionHeader title="أنشط العملاء هذا الشهر" icon="people-outline" />
