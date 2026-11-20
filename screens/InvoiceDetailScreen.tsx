@@ -411,13 +411,36 @@ export default function InvoiceDetailScreen() {
           ))}
         </Card>
 
-        <TotalsBlock
-          subtotal={invoice.subtotal}
-          discount={invoice.discount}
-          taxRate={invoice.taxRate}
-          taxAmount={invoice.taxAmount}
-          total={invoice.total}
-        />
+        <Card style={{ marginBottom: SPACING.lg }}>
+          <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', paddingVertical: 6 }}>
+            <Text style={[rtlText, { color: c.textMuted, fontSize: 13 }]}>الإجمالي الفرعي</Text>
+            <Text style={[rtlText, { color: c.text, fontSize: 13, fontWeight: '700' }]}>{formatMoney(invoice.subtotal, currency)}</Text>
+          </View>
+          {Number(invoice.discount) > 0 ? (
+            <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', paddingVertical: 6 }}>
+              <Text style={[rtlText, { color: c.textMuted, fontSize: 13 }]}>الخصم</Text>
+              <Text style={[rtlText, { color: c.danger, fontSize: 13, fontWeight: '700' }]}>- {formatMoney(invoice.discount, currency)}</Text>
+            </View>
+          ) : null}
+          <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', paddingVertical: 6 }}>
+            <Text style={[rtlText, { color: c.textMuted, fontSize: 13 }]}>الضريبة ({invoice.taxRate}%)</Text>
+            <Text style={[rtlText, { color: c.text, fontSize: 13, fontWeight: '700' }]}>{formatMoney(invoice.taxAmount, currency)}</Text>
+          </View>
+          <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', paddingVertical: 8, borderTopWidth: 1, borderTopColor: c.borderSoft, marginTop: 4 }}>
+            <Text style={[rtlText, { color: c.text, fontSize: 14, fontWeight: '700' }]}>إجمالي الفاتورة</Text>
+            <Text style={[rtlText, { color: c.text, fontSize: 14, fontWeight: '800' }]}>{formatMoney(invoice.total, currency)}</Text>
+          </View>
+          {paidAmount > 0 ? (
+            <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', paddingVertical: 6 }}>
+              <Text style={[rtlText, { color: c.success, fontSize: 13, fontWeight: '700' }]}>المدفوع (سندات القبض)</Text>
+              <Text style={[rtlText, { color: c.success, fontSize: 13, fontWeight: '800' }]}>- {formatMoney(paidAmount, currency)}</Text>
+            </View>
+          ) : null}
+          <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', paddingTop: 10, paddingBottom: 4, borderTopWidth: 1, borderTopColor: c.borderSoft, marginTop: 4 }}>
+            <Text style={[rtlText, { color: c.text, fontSize: 15, fontWeight: '800' }]}>الإجمالي المستحق</Text>
+            <Text style={[rtlText, { color: remaining > 0 ? c.primary : c.success, fontSize: 16, fontWeight: '900' }]}>{formatMoney(remaining, currency)}</Text>
+          </View>
+        </Card>
 
         <ActionDropdown label="خيارات الفاتورة والتصدير" items={[
           { label: "طباعة / حفظ PDF", sub: "طباعة الفاتورة الرسمية أو حفظها PDF", icon: "print-outline", onPress: doPrint },

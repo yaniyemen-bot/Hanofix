@@ -172,7 +172,7 @@ export async function printHtml(html: string): Promise<boolean> {
 export async function savePdfNative(html: string, filename: string): Promise<string | null> {
   if (isWeb) return null;
   try {
-    const res = await Print.printToFileAsync({ html, width: 595, height: 842 });
+    const res = await Print.printToFileAsync({ html });
     if (!res?.uri) return null;
     try {
       const src = new File(res.uri);
