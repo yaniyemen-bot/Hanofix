@@ -1,3 +1,5 @@
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system";
 import React, { useState } from 'react';
 import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -13,7 +15,7 @@ import { ROLE_LABELS, can, isManager } from '../lib/permissions';
 export default function MoreScreen() {
   const c = usePalette();
   const nav = useNavigation<any>();
-  const { settings, currency, currentUser, role, alerts, companies, works, invoices, vouchers, ledger, showToast, resetDemoData } = useApp();
+  const { settings, currency, currentUser, role, alerts, companies, works, invoices, vouchers, ledger, showToast, importBackupData } = useApp();
   const m = useMetrics();
   const [busy, setBusy] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -86,6 +88,9 @@ export default function MoreScreen() {
     showToast(res === 'failed' ? 'تعذر إنشاء النسخة الاحتياطية' : 'تم تنزيل نسخة من جميع الأعمال (CSV)', res === 'failed' ? 'error' : 'success');
   };
 
+  
+  const handleImportBackup = async () => { try { const r = await DocumentPicker.getDocumentAsync({ type: ["*/*"], copyToCacheDirectory: true }); if (r.canceled || !r.assets?.) return; const f = r.assets; const txt = await FileSystem.readAsStringAsync(f.uri, { encoding: FileSystem.EncodingType.UTF8 }); const out = importBackupData(txt, f.name); showToast(out.imported > 0 ? `تم استيراد ${out.imported} سجل (${out.type})` : "لم يتم العثور على بيانات", out.imported > 0 ? "success" : "error"); } catch { showToast("تعذر قراءة الملف", "error"); } };
+
   return (
     <Screen scroll>
       <ScreenHeader title="المزيد" subtitle={`${settings.businessName} • ${ROLE_LABELS[role]}`} />
@@ -141,17 +146,7 @@ export default function MoreScreen() {
       <SectionHeader title="الأدوات" icon="apps-outline" />
       <Card padded={false} style={{ overflow: 'hidden', marginBottom: SPACING.lg }}>
         {can(role, 'cash.view') ? (
-          <MenuRow
-            label={settings.labels.cash}
-            icon="wallet-outline"
-            tone="primary"
-            onPress={() => nav.navigate('Cash')}
-            hint={`رصيد الصندوق ${formatMoney(m.cashBalance, currency)} • ${m.vouchersCount} سند`}
-          />
-        ) : null}
-        <MenuRow label={settings.labels.reports} icon="stats-chart-outline" onPress={() => nav.navigate('Reports')} hint="إيرادات، مصروفات، تحصيل، أعلى العملاء" />
-        <MenuRow label={settings.labels.alerts} icon="notifications-outline" badge={alerts.length} onPress={() => nav.navigate('Alerts')} hint="فواتير متأخرة وتجاوز الحد المالي" />
-        <MenuRow label={settings.labels.apk} icon="logo-android" onPress={() => nav.navigate('Apk')} hint={isNativeAndroid ? 'التحديثات وملف التثبيت' : 'احصل على نسخة أندرويد من التطبيق'} />
+          
         <MenuRow label="النسخ الاحتياطي" icon="cloud-download-outline" onPress={backup} hint="تنزيل نسخة من جميع الأعمال والفواتير والسندات (CSV)" />
       </Card>
 
@@ -173,20 +168,7 @@ export default function MoreScreen() {
         />
       </Card>
 
-      {settings.showResetDemoData && can(role, 'settings.edit') ? (
-        <>
-          <SectionHeader title="البيانات" icon="server-outline" />
-          <Card padded={false} style={{ overflow: 'hidden', marginBottom: SPACING.lg }}>
-            <MenuRow
-              label="استعادة البيانات الافتراضية"
-              icon="refresh-outline"
-              tone="danger"
-              onPress={() => setConfirmReset(true)}
-              hint="يعيد الشركات والأعمال التابعة لها إلى البيانات الافتراضية مع الإبقاء على إعداداتك"
-            />
-          </Card>
-        </>
-      ) : null}
+      {can(role, "settings.edit") ? (<><SectionHeader title="النسخ الاحتياطي" icon="cloud-upload-outline" /><Card padded={false} style={{ overflow: "hidden", marginBottom: SPACING.lg }}><MenuRow label="استيراد نسخة احتياطية (CSV / JSON)" icon="folder-open-outline" onPress={handleImportBackup} hint="استعادة البيانات من مجلد Download" /></Card></>) : null}
 
       <Card style={{ marginBottom: SPACING.lg }}>
         <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: SPACING.md }}>
@@ -211,7 +193,7 @@ export default function MoreScreen() {
         confirmLabel="استعادة"
         onCancel={() => setConfirmReset(false)}
         onConfirm={() => {
-          resetDemoData();
+          importBackupData();
           setConfirmReset(false);
           showToast('تمت استعادة البيانات الافتراضية', 'info');
         }}

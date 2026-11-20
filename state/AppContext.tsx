@@ -92,6 +92,8 @@ interface AppContextValue {
   // الصندوق والسندات المالية
   addVoucher: (input: Omit<Voucher, 'id' | 'number' | 'createdAt' | 'createdBy'> & { number?: string }) => Voucher;
   deleteVoucher: (id: ID) => void;
+  updateVoucher: (id: ID, patch: any) => void;
+  importBackupData: (content: string, fileName?: string) => { imported: number; type: string };
   addLedgerEntry: (
     input: Omit<LedgerEntry, 'id' | 'createdAt' | 'createdBy'>
   ) => LedgerEntry;
@@ -464,6 +466,63 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       };
     });
   }, []);
+  const updateVoucher = useCallback((id: ID, patch: any) => {
+    setData((d) => {
+      const oldV = d.vouchers.find((v) => v.id === id);
+      if (!oldV) return d;
+      const amt = patch.amount !== undefined ? round2(Math.max(0, Number(patch.amount) || 0)) : oldV.amount;
+      const diff = round2(amt - (oldV.amount || 0));
+      const upd: any = { ...oldV, ...patch, amount: amt };
+      const invoices = oldV.invoiceId ? d.invoices.map((inv) => {
+        if (inv.id !== oldV.invoiceId) return inv;
+        const paidAmount = round2(Math.max(0, (inv.paidAmount || 0) + diff));
+        const next = { ...inv, paidAmount, remaining: round2(Math.max(0, inv.total - paidAmount)) };
+        return { ...next, status: deriveInvoiceStatus(next) };
+      }) : d.invoices;
+      const ledger = d.ledger.map((l) => l.voucherId === id ? { ...l, amount: amt, date: upd.date, note: patch.note ?? patch.notes ?? l.note } : l);
+      return { ...d, vouchers: d.vouchers.map((v) => (v.id === id ? upd : v)), invoices, ledger };
+    });
+  }, []);
+  const importBackupData = useCallback((content: string, fileName = "") => {
+    const txt = content.replace(/^\uFEFF/, "").trim();
+    if (!txt) return { imported: 0, type: "empty" };
+    let count = 0;
+    if (txt.startsWith("{") || txt.startsWith("[")) {
+      const p = JSON.parse(txt); const src = p.data || p;
+      setData((d) => {
+        const m = (a: any[], b?: any[]) => { if (!Array.isArray(b)) return a; const mp = new Map(a.map((x) => [x.id, x])); b.forEach((x) => { if (x?.id) { mp.set(x.id, x); count++; } }); return Array.from(mp.values()); };
+        return { ...d, companies: m(d.companies, src.companies), works: m(d.works, src.works), invoices: m(d.invoices, src.invoices), vouchers: m(d.vouchers, src.vouchers), ledger: m(d.ledger, src.ledger) };
+      });
+      return { imported: count, type: "JSON" };
+    }
+    const lines = txt.split(/\r?\n/).filter(Boolean);
+    const parse = (l: string) => { const r: string[] = []; let cur = "", q = false; for (const ch of l) { if (ch === """) q = !q; else if (ch === "," && !q) { r.push(cur.trim()); cur = ""; } else cur += ch; } r.push(cur.trim()); return r; };
+    const hi = lines.findIndex((l) => /الرقم|الاسم|المبلغ|رقم/.test(l));
+    if (hi < 0 || hi >= lines.length - 1) return { imported: 0, type: "CSV" };
+    const hdr = parse(lines[hi]);
+    const col = (...ns: string[]) => hdr.findIndex((h) => ns.some((n) => h.includes(n)));
+    const now = new Date().toISOString().slice(0, 10);
+    setData((d) => {
+      const next = { ...d, companies: [...d.companies], invoices: [...d.invoices], vouchers: [...d.vouchers], ledger: [...d.ledger] };
+      const cName = col("الاسم", "الشركة", "العميل"), cAmt = col("المبلغ", "الإجمالي", "القيمة"), cDate = col("التاريخ"), cNum = col("الرقم", "رقم"), cNote = col("البيان", "ملاحظات", "الوصف", "العنوان");
+      const low = fileName.toLowerCase();
+      lines.slice(hi + 1).map(parse).filter((r) => r.some(Boolean)).forEach((r, i) => {
+        const id = "imp_" + Date.now() + "_" + i, val = parseFloat((r[cAmt] || "0").replace(/[^0-9.-]/g, "")) || 0;
+        const date = (cDate >= 0 && r[cDate]) ? r[cDate] : now, title = (cNote >= 0 && r[cNote]) ? r[cNote] : (cName >= 0 ? r[cName] : "مستورد");
+        if (low.includes("voucher") || low.includes("سند") || hdr.some((h) => h.includes("نوع السند"))) {
+          next.vouchers.push({ id, number: (cNum >= 0 && r[cNum]) || ("V-" + (i + 1)), type: r.join(" ").includes("صرف") ? "payment" : "receipt", amount: val, date, paymentMethod: "cash", companyId: "", invoiceId: null, note: title, createdBy: d.currentUserId || "admin" } as any); count++;
+        } else if (low.includes("invoice") || low.includes("فاتور")) {
+          next.invoices.push({ id, number: (cNum >= 0 && r[cNum]) || ("INV-" + (i + 1)), companyId: "", date, dueDate: date, items: [], subtotal: val, tax: 0, total: val, paidAmount: 0, remaining: val, status: "unpaid", notes: title, voucherIds: [], createdBy: d.currentUserId || "admin" } as any); count++;
+        } else if ((low.includes("compan") || low.includes("عملا") || low.includes("شرك")) && cName >= 0 && r[cName]) {
+          next.companies.push({ id, name: r[cName], phone: r[col("الهاتف", "جوال")] || "", email: "", address: "", notes: "", createdAt: date } as any); count++;
+        } else if (val > 0) {
+          next.ledger.push({ id, type: r.join(" ").includes("مصروف") ? "expense" : "income", category: "مستورد", amount: val, date, note: title, voucherId: null, createdBy: d.currentUserId || "admin" } as any); count++;
+        }
+      });
+      return next;
+    });
+    return { imported: count, type: "CSV" };
+  }, []);
 
   const addLedgerEntry = useCallback<AppContextValue['addLedgerEntry']>((input) => {
     const d = dataRef.current;
@@ -756,6 +815,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     recordInvoicePayment,
     addVoucher,
     deleteVoucher,
+      updateVoucher,
+      importBackupData,
     addLedgerEntry,
     deleteLedgerEntry,
     vouchersOfInvoice,

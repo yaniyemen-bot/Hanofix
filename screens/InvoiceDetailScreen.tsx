@@ -415,7 +415,7 @@ export default function InvoiceDetailScreen() {
           discount={invoice.discount}
           taxRate={invoice.taxRate}
           taxAmount={invoice.taxAmount}
-          total={invoice.total}
+          total={Math.max(0, Number(invoice.remaining ?? (invoice.total - (invoice.paidAmount || 0))))}
         />
 
         <SectionHeader title="تصدير ومشاركة" icon="share-social-outline" />

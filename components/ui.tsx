@@ -66,8 +66,8 @@ export function Screen({
 
   return (
     <View style={[{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }, style]}>
-      {keyboard && Platform.OS !== 'web' ? (
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+      {Platform.OS !== 'web' ? (
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}>
           {body}
         </KeyboardAvoidingView>
       ) : (
@@ -738,7 +738,7 @@ export function StatTile({
   };
   const t = tones[tone];
   return (
-    <Card onPress={onPress} style={{ flex: 1, flexBasis: 0, minWidth: 0 }}>
+    <View style={{ flex: 1, flexBasis: 0, minWidth: 0 }}><Card onPress={onPress} style={{ flex: 1, width: '100%' }}>
       <View style={{ flexDirection: 'row-reverse', alignItems: 'flex-start', gap: 10 }}>
         <View
           style={{
@@ -772,7 +772,7 @@ export function StatTile({
           {subtitle}
         </Text>
       ) : null}
-    </Card>
+    </Card></View>
   );
 }
 
@@ -1005,51 +1005,127 @@ export function Segmented<T extends string>({
   value,
   onChange,
 }: {
-  options: { value: T; label: string }[];
+  options: { label: string; value: T }[];
   value: T;
   onChange: (v: T) => void;
 }) {
   const c = usePalette();
+  const [open, setOpen] = React.useState(false);
+  const current = options.find((o) => o.value === value) ?? options[0];
+
+  if (options.length <= 2) {
+    return (
+      <View
+        style={{
+          flexDirection: 'row-reverse',
+          backgroundColor: c.surfaceAlt,
+          borderRadius: RADIUS.md,
+          padding: 4,
+          borderWidth: 1,
+          borderColor: c.border,
+          gap: 4,
+        }}
+      >
+        {options.map((o) => {
+          const active = o.value === value;
+          return (
+            <Pressable
+              key={o.value}
+              onPress={() => onChange(o.value)}
+              style={{
+                flex: 1,
+                paddingVertical: 9,
+                borderRadius: RADIUS.sm,
+                backgroundColor: active ? c.surface : 'transparent',
+                alignItems: 'center',
+              }}
+            >
+              <Text style={[rtlText, { color: active ? c.primaryText : c.textMuted, fontSize: 13, fontWeight: '800' }]}>
+                {o.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    );
+  }
+
   return (
-    <View
-      style={{
-        flexDirection: 'row-reverse',
-        backgroundColor: c.surfaceAlt,
-        borderRadius: RADIUS.md,
-        padding: 4,
-        gap: 4,
-      }}
-    >
-      {options.map((o) => {
-        const active = o.value === value;
-        return (
-          <Pressable
-            key={o.value}
-            onPress={() => onChange(o.value)}
+    <View style={{ marginVertical: 2 }}>
+      <Pressable
+        onPress={() => setOpen(true)}
+        style={{
+          flexDirection: 'row-reverse',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          backgroundColor: c.surface,
+          borderWidth: 1,
+          borderColor: c.borderStrong,
+          borderRadius: RADIUS.md,
+          paddingHorizontal: 14,
+          paddingVertical: 11,
+        }}
+      >
+        <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 8 }}>
+          <Ionicons name="filter-outline" size={17} color={c.primary} />
+          <Text style={[rtlText, { color: c.text, fontSize: 13.5, fontWeight: '800' }]}>
+            {current?.label ?? 'اختر'}
+          </Text>
+        </View>
+        <Ionicons name="chevron-down" size={18} color={c.textMuted} />
+      </Pressable>
+
+      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <Pressable
+          onPress={() => setOpen(false)}
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(15, 23, 42, 0.45)',
+            justifyContent: 'center',
+            padding: 24,
+          }}
+        >
+          <View
             style={{
-              flex: 1,
-              paddingVertical: 9,
-              borderRadius: RADIUS.sm,
-              backgroundColor: active ? c.surface : 'transparent',
-              alignItems: 'center',
-              shadowColor: c.shadow,
-              shadowOpacity: active && !c.dark ? 0.08 : 0,
-              shadowRadius: 6,
-              shadowOffset: { width: 0, height: 2 },
-              elevation: active && !c.dark ? 2 : 0,
+              backgroundColor: c.surface,
+              borderRadius: RADIUS.lg,
+              padding: 12,
+              borderWidth: 1,
+              borderColor: c.border,
             }}
           >
-            <Text
-              style={[rtlText, { color: active ? c.primaryText : c.textMuted, fontSize: options.length > 3 ? 11.5 : 13, fontWeight: '800', textAlign: 'center' }]}
-              numberOfLines={2}
-              adjustsFontSizeToFit
-              minimumFontScale={0.7}
-            >
-              {o.label}
+            <Text style={[rtlText, { color: c.textMuted, fontSize: 12, fontWeight: '700', paddingHorizontal: 10, paddingVertical: 6 }]}>
+              اختر التصنيف
             </Text>
-          </Pressable>
-        );
-      })}
+            {options.map((o) => {
+              const active = o.value === value;
+              return (
+                <Pressable
+                  key={o.value}
+                  onPress={() => {
+                    onChange(o.value);
+                    setOpen(false);
+                  }}
+                  style={{
+                    flexDirection: 'row-reverse',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingHorizontal: 12,
+                    paddingVertical: 12,
+                    borderRadius: RADIUS.md,
+                    backgroundColor: active ? c.primarySoft : 'transparent',
+                  }}
+                >
+                  <Text style={[rtlText, { color: active ? c.primaryText : c.text, fontSize: 14, fontWeight: active ? '800' : '600' }]}>
+                    {o.label}
+                  </Text>
+                  {active ? <Ionicons name="checkmark-circle" size={19} color={c.primary} /> : null}
+                </Pressable>
+              );
+            })}
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }

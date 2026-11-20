@@ -1,3 +1,4 @@
+import { Modal, TextInput } from "react-native";
 import React, { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -39,18 +40,28 @@ export default function VoucherDetailScreen() {
   const c = usePalette();
   const nav = useNavigation<any>();
   const route = useRoute<any>();
-  const { vouchers, settings, currency, role, deleteVoucher, showToast, companyById } = useApp();
+  const { vouchers, settings, currency, role, deleteVoucher, updateVoucher, showToast, companyById } = useApp();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editAmount, setEditAmount] = useState("");
+  const [editDate, setEditDate] = useState("");
+  const [editNote, setEditNote] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
 
   const voucher = vouchers.find((v) => v.id === route.params?.voucherId);
 
   if (!voucher) {
-    return (
+    
+  const doPrint = async () => { setBusy("print"); try { await printHtml(buildVoucherHtml(voucher, settings, currency)); } finally { setBusy(null); } };
+  const openEdit = () => { if (role !== "admin" && !can(role, "settings.edit")) { showToast("التعديل للمدير فقط", "error"); return; } setEditAmount(String(voucher.amount || "")); setEditDate(voucher.date || ""); setEditNote((voucher as any).note || (voucher as any).notes || ""); setEditOpen(true); };
+  const saveEdit = () => { const n = parseFloat(editAmount); if (!n || n <= 0) { showToast("أدخل مبلغاً صحيحاً", "error"); return; } updateVoucher(voucher.id, { amount: n, date: editDate.trim() || voucher.date, note: editNote.trim(), notes: editNote.trim() }); setEditOpen(false); showToast("تم تعديل السند وتحديث الأرصدة", "success"); };
+
+  return (
       <Screen>
         <ScreenHeader title="السند المالي" onBack={() => nav.goBack()} />
         <EmptyState icon="alert-circle-outline" title="السند غير موجود" body="ربما تم حذفه من حركة الصندوق" />
-      </Screen>
+      <Modal visible={editOpen} transparent animationType="fade" onRequestClose={() => setEditOpen(false)}><View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "center", padding: 20 }}><View style={{ backgroundColor: c.card, borderRadius: 16, padding: 18, borderWidth: 1, borderColor: c.border }}><Text style={{ color: c.text, fontSize: 17, fontWeight: "800", textAlign: "right", marginBottom: 12 }}>تعديل السند</Text><Text style={{ color: c.textMuted, fontSize: 12, textAlign: "right" }}>المبلغ</Text><TextInput value={editAmount} onChangeText={setEditAmount} keyboardType="numeric" style={{ borderWidth: 1, borderColor: c.border, borderRadius: 10, padding: 10, color: c.text, textAlign: "right", marginBottom: 10 }} /><Text style={{ color: c.textMuted, fontSize: 12, textAlign: "right" }}>التاريخ</Text><TextInput value={editDate} onChangeText={setEditDate} style={{ borderWidth: 1, borderColor: c.border, borderRadius: 10, padding: 10, color: c.text, textAlign: "right", marginBottom: 10 }} /><Text style={{ color: c.textMuted, fontSize: 12, textAlign: "right" }}>البيان</Text><TextInput value={editNote} onChangeText={setEditNote} multiline style={{ borderWidth: 1, borderColor: c.border, borderRadius: 10, padding: 10, color: c.text, textAlign: "right", minHeight: 60, marginBottom: 14 }} /><View style={{ flexDirection: "row-reverse", gap: 10 }}><View style={{ flex: 1 }}><Btn label="حفظ" onPress={saveEdit} /></View><View style={{ flex: 1 }}><Btn label="إلغاء" variant="outline" onPress={() => setEditOpen(false)} /></View></View></View></View></Modal>
+    </Screen>
     );
   }
 
@@ -192,6 +203,8 @@ export default function VoucherDetailScreen() {
               setConfirmDelete(true);
             }}
           />
+          <Btn label="طباعة السند" icon="print-outline" variant="outline" loading={busy === "print"} onPress={doPrint} />
+          {(role === "admin" || can(role, "settings.edit")) ? <Btn label="تعديل السند" icon="create-outline" variant="outline" onPress={openEdit} /> : null}
           <Btn label="العودة لحركة الصندوق" icon="wallet-outline" variant="outline" onPress={() => nav.navigate('Cash')} />
         </View>
       </ScrollView>
