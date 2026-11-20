@@ -18,7 +18,7 @@ export default function MoreScreen() {
   const { settings, currency, currentUser, role, alerts, companies, works, invoices, vouchers, ledger, showToast, importBackupData } = useApp();
   const m = useMetrics();
   const [busy, setBusy] = useState(false);
-  const [confirmReset, setConfirmReset] = useState(false);
+  const handleImportBackup = async () => { try { const r = await DocumentPicker.getDocumentAsync({ type: ["*/*"], copyToCacheDirectory: true }); if (r.canceled || !r.assets || !r.assets.length) return; const f = r.assets?.[0]; if (!f) return; const txt = await FileSystem.readAsStringAsync(f.uri, { encoding: FileSystem.EncodingType.UTF8 }); const out = importBackupData(txt, f.name); showToast(out.imported > 0 ? `تم استيراد ${out.imported} سجل (${out.type})` : "لم يتم العثور على سجلات", out.imported > 0 ? "success" : "error"); } catch { showToast("تعذر قراءة الملف", "error"); } };
 
   const version = Constants.expoConfig?.version ?? '1.1.0';
   const isNativeAndroid = Platform.OS === 'android';
@@ -88,9 +88,6 @@ export default function MoreScreen() {
     showToast(res === 'failed' ? 'تعذر إنشاء النسخة الاحتياطية' : 'تم تنزيل نسخة من جميع الأعمال (CSV)', res === 'failed' ? 'error' : 'success');
   };
 
-  
-  const handleImportBackup = async () => { try { const r = await DocumentPicker.getDocumentAsync({ type: ["*/*"], copyToCacheDirectory: true }); if (r.canceled || !r.assets || !r.assets.length) return; const f = r.assets[0]; const txt = await FileSystem.readAsStringAsync(f.uri, { encoding: FileSystem.EncodingType.UTF8 }); const out = importBackupData(txt, f.name); showToast(out.imported > 0 ? `تم استيراد ${out.imported} سجل (${out.type})` : "لم يتم العثور على بيانات", out.imported > 0 ? "success" : "error"); } catch { showToast("تعذر قراءة الملف", "error"); } };
-
   return (
     <Screen scroll>
       <ScreenHeader title="المزيد" subtitle={`${settings.businessName} • ${ROLE_LABELS[role]}`} />
@@ -146,9 +143,17 @@ export default function MoreScreen() {
       <SectionHeader title="الأدوات" icon="apps-outline" />
       <Card padded={false} style={{ overflow: 'hidden', marginBottom: SPACING.lg }}>
         {can(role, 'cash.view') ? (
-          
-        <MenuRow label="النسخ الاحتياطي" icon="cloud-download-outline" onPress={backup} hint="تنزيل نسخة من جميع الأعمال والفواتير والسندات (CSV)" />
+          <MenuRow
+            label={settings.labels.cash}
+            icon="wallet-outline"
+            tone="primary"
+            onPress={() => nav.navigate('Cash')}
+            hint={`رصيد الصندوق ${formatMoney(m.cashBalance, currency)} • ${m.vouchersCount} سند`}
+          />
         ) : null}
+        <MenuRow label={settings.labels.reports} icon="stats-chart-outline" onPress={() => nav.navigate('Reports')} hint="إيرادات، مصروفات، تحصيل، أعلى العملاء" />
+        <MenuRow label={settings.labels.alerts} icon="notifications-outline" badge={alerts.length} onPress={() => nav.navigate('Alerts')} hint="فواتير متأخرة وتجاوز الحد المالي" />
+        <MenuRow label="النسخ الاحتياطي" icon="cloud-download-outline" onPress={backup} hint="تنزيل نسخة من جميع الأعمال والفواتير والسندات (CSV)" />
       </Card>
 
       <SectionHeader title="الإعدادات" icon="settings-outline" />
@@ -169,7 +174,7 @@ export default function MoreScreen() {
         />
       </Card>
 
-      {can(role, "settings.edit") ? (<><SectionHeader title="النسخ الاحتياطي" icon="cloud-upload-outline" /><Card padded={false} style={{ overflow: "hidden", marginBottom: SPACING.lg }}><MenuRow label="استيراد نسخة احتياطية (CSV / JSON)" icon="folder-open-outline" onPress={handleImportBackup} hint="استعادة البيانات من مجلد Download" /></Card></>) : null}
+      {can(role, 'settings.edit') ? (<><SectionHeader title="النسخ الاحتياطي والاستعادة" icon="cloud-upload-outline" /><Card padded={false} style={{ overflow: 'hidden', marginBottom: SPACING.lg }}><MenuRow label="استيراد نسخة احتياطية (CSV / JSON)" icon="folder-open-outline" onPress={handleImportBackup} hint="استعادة البيانات السابقة من مجلد Download" /></Card></>) : null}
 
       <Card style={{ marginBottom: SPACING.lg }}>
         <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: SPACING.md }}>

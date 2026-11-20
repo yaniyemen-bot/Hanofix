@@ -17,7 +17,7 @@ import {
   OptionPicker,
   Screen,
   ScreenHeader,
-  SectionHeader,
+  SectionHeader, ActionDropdown,
   SelectField,
   rtlText,
 } from '../components/ui';
@@ -276,7 +276,7 @@ export default function InvoiceDetailScreen() {
                 adjustsFontSizeToFit
                 minimumFontScale={0.55}
               >
-                {formatMoney(invoice.total, currency)}
+                {formatMoney(invoice.remaining, currency)}
               </Text>
               <Text style={[rtlText, { color: c.primaryText, fontSize: 11.5, marginTop: 6, opacity: 0.85, lineHeight: 17 }]} numberOfLines={2}>
                 {items.length} بند • {monthPeriod(invoice.periodStart, invoice.periodEnd)}
@@ -415,64 +415,20 @@ export default function InvoiceDetailScreen() {
           discount={invoice.discount}
           taxRate={invoice.taxRate}
           taxAmount={invoice.taxAmount}
-          total={Math.max(0, Number(invoice.remaining ?? (invoice.total - (invoice.paidAmount || 0))))}
+          total={invoice.total}
         />
 
-        <SectionHeader title="تصدير ومشاركة" icon="share-social-outline" />
-        <Card padded={false} style={{ marginBottom: SPACING.lg, overflow: 'hidden' }}>
-          <MenuRow label="ملف طباعة / PDF" icon="print-outline" onPress={doPrint} hint="يفتح نافذة الطباعة ويمكن الحفظ كـ PDF" right={busy === 'print' ? <Ionicons name="reload" size={16} color={c.textFaint} /> : undefined} />
-          {!isWeb ? (
-            <MenuRow label="حفظ ومشاركة PDF" icon="document-outline" onPress={doPdf} hint="ينشئ ملف PDF جاهز للإرسال" />
-          ) : null}
-          <MenuRow label="مشاركة نصية" icon="chatbox-ellipses-outline" onPress={doShare} hint={isWeb ? 'نسخ تفاصيل الفاتورة إلى الحافظة' : 'إرسال ملخص الفاتورة عبر التطبيقات'} />
-          <MenuRow label="تصدير Excel" icon="grid-outline" onPress={doExcel} hint="ملف ‎.xls يفتح في Excel مع بنود الفاتورة وسندات التحصيل" />
-          <MenuRow label="تصدير CSV" icon="download-outline" onPress={doCsv} hint="ملف جدول بيانات لبنود الفاتورة" />
-        </Card>
-
-        <SectionHeader title="إدارة الفاتورة" icon="settings-outline" />
-        <Card padded={false} style={{ overflow: 'hidden' }}>
-          <MenuRow
-            label="تغيير الحالة"
-            icon="swap-horizontal-outline"
-            onPress={() => can(role, 'invoices.edit') && setStatusOpen(true)}
-            hint={`الحالة الحالية: ${STATUS_LABELS[invoice.status]}`}
-          />
-          {invoice.status !== 'paid' ? (
-            <MenuRow
-              label="تحديد كمدفوعة"
-              icon="checkmark-done-outline"
-              tone="primary"
-              onPress={() => can(role, 'invoices.edit') && changeStatus('paid')}
-              hint={remaining > 0 ? `يصدر سند قبض بكامل المتبقي (${formatMoney(remaining, currency)})` : 'يتم تسجيل تاريخ السداد تلقائيًا'}
-            />
-          ) : null}
-          <MenuRow
-            label="ملاحظات الفاتورة"
-            icon="create-outline"
-            onPress={() => {
-              if (!can(role, 'invoices.edit')) {
-                showToast('دورك الحالي لا يسمح بالتعديل', 'error');
-                return;
-              }
-              setNotesDraft(invoice.notes);
-              setNotesOpen(true);
-            }}
-            hint={invoice.notes || 'شروط الدفع، تفاصيل إضافية...'}
-          />
-          <MenuRow
-            label="حذف الفاتورة"
-            icon="trash-outline"
-            tone="danger"
-            onPress={() => {
-              if (!can(role, 'invoices.delete')) {
-                showToast('دورك الحالي لا يسمح بحذف الفواتير', 'error');
-                return;
-              }
-              setConfirmDelete(true);
-            }}
-            hint="ستعود البنود إلى قائمة الأعمال غير المفوترة"
-          />
-        </Card>
+        <ActionDropdown label="خيارات الفاتورة والتصدير" items={[
+  { label: "طباعة / حفظ PDF", sub: "طباعة الفاتورة الرسمية أو حفظها PDF", icon: "print-outline", onPress: doPrint },
+  { label: "حفظ PDF على الجهاز", sub: "تصدير ملف PDF مباشر", icon: "document-outline", onPress: doPdf, hidden: isWeb },
+  { label: "تصدير Excel (.xlsx)", sub: "فتح الفاتورة في جدول Excel", icon: "grid-outline", onPress: doExcel },
+  { label: "تصدير CSV", sub: "ملف جدول بيانات", icon: "download-outline", onPress: doCsv },
+  { label: "مشاركة نصية", sub: "نسخ أو إرسال ملخص الفاتورة", icon: "chatbox-ellipses-outline", onPress: doShare },
+  { label: "تحديد كمدفوعة بالكامل", sub: "تسجيل المتبقي كمدفوع", icon: "checkmark-done-outline", tone: "primary", hidden: invoice.status === "paid", onPress: () => can(role, "invoices.edit") && changeStatus("paid") },
+  { label: "تغيير حالة الفاتورة", sub: `الحالة الحالية: ${STATUS_LABELS[invoice.status]}`, icon: "swap-horizontal-outline", onPress: () => can(role, "invoices.edit") && setStatusOpen(true) },
+  { label: "تعديل ملاحظات الفاتورة", sub: invoice.notes || "إضافة أو تعديل الملاحظات", icon: "create-outline", onPress: () => { if (!can(role, "invoices.edit")) { showToast("الدور الحالي لا يسمح بالتعديل", "error"); return; } setNotesDraft(invoice.notes); setNotesOpen(true); } },
+  { label: "حذف الفاتورة", sub: "حذف الفاتورة والبنود المرتبطة", icon: "trash-outline", tone: "danger", onPress: () => { if (!can(role, "invoices.delete")) { showToast("الدور الحالي لا يسمح بحذف الفاتورة", "error"); return; } setConfirmDelete(true); } },
+]} />
 
         {!can(role, 'invoices.edit') ? (
           <View style={{ marginTop: SPACING.lg }}>

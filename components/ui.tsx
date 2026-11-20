@@ -66,8 +66,8 @@ export function Screen({
 
   return (
     <View style={[{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }, style]}>
-      {Platform.OS !== 'web' ? (
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}>
+      {keyboard && Platform.OS !== 'web' ? (
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
           {body}
         </KeyboardAvoidingView>
       ) : (
@@ -738,7 +738,7 @@ export function StatTile({
   };
   const t = tones[tone];
   return (
-    <View style={{ flex: 1, flexBasis: 0, minWidth: 0 }}><Card onPress={onPress} style={{ flex: 1, width: '100%' }}>
+    <Card onPress={onPress} style={{ flex: 1, flexBasis: 0, minWidth: 0 }}>
       <View style={{ flexDirection: 'row-reverse', alignItems: 'flex-start', gap: 10 }}>
         <View
           style={{
@@ -772,7 +772,7 @@ export function StatTile({
           {subtitle}
         </Text>
       ) : null}
-    </Card></View>
+    </Card>
   );
 }
 
@@ -1005,127 +1005,51 @@ export function Segmented<T extends string>({
   value,
   onChange,
 }: {
-  options: { label: string; value: T }[];
+  options: { value: T; label: string }[];
   value: T;
   onChange: (v: T) => void;
 }) {
   const c = usePalette();
-  const [open, setOpen] = React.useState(false);
-  const current = options.find((o) => o.value === value) ?? options[0];
-
-  if (options.length <= 2) {
-    return (
-      <View
-        style={{
-          flexDirection: 'row-reverse',
-          backgroundColor: c.surfaceAlt,
-          borderRadius: RADIUS.md,
-          padding: 4,
-          borderWidth: 1,
-          borderColor: c.border,
-          gap: 4,
-        }}
-      >
-        {options.map((o) => {
-          const active = o.value === value;
-          return (
-            <Pressable
-              key={o.value}
-              onPress={() => onChange(o.value)}
-              style={{
-                flex: 1,
-                paddingVertical: 9,
-                borderRadius: RADIUS.sm,
-                backgroundColor: active ? c.surface : 'transparent',
-                alignItems: 'center',
-              }}
-            >
-              <Text style={[rtlText, { color: active ? c.primaryText : c.textMuted, fontSize: 13, fontWeight: '800' }]}>
-                {o.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-    );
-  }
-
   return (
-    <View style={{ marginVertical: 2 }}>
-      <Pressable
-        onPress={() => setOpen(true)}
-        style={{
-          flexDirection: 'row-reverse',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: c.surface,
-          borderWidth: 1,
-          borderColor: c.borderStrong,
-          borderRadius: RADIUS.md,
-          paddingHorizontal: 14,
-          paddingVertical: 11,
-        }}
-      >
-        <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 8 }}>
-          <Ionicons name="filter-outline" size={17} color={c.primary} />
-          <Text style={[rtlText, { color: c.text, fontSize: 13.5, fontWeight: '800' }]}>
-            {current?.label ?? 'اختر'}
-          </Text>
-        </View>
-        <Ionicons name="chevron-down" size={18} color={c.textMuted} />
-      </Pressable>
-
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable
-          onPress={() => setOpen(false)}
-          style={{
-            flex: 1,
-            backgroundColor: 'rgba(15, 23, 42, 0.45)',
-            justifyContent: 'center',
-            padding: 24,
-          }}
-        >
-          <View
+    <View
+      style={{
+        flexDirection: 'row-reverse',
+        backgroundColor: c.surfaceAlt,
+        borderRadius: RADIUS.md,
+        padding: 4,
+        gap: 4,
+      }}
+    >
+      {options.map((o) => {
+        const active = o.value === value;
+        return (
+          <Pressable
+            key={o.value}
+            onPress={() => onChange(o.value)}
             style={{
-              backgroundColor: c.surface,
-              borderRadius: RADIUS.lg,
-              padding: 12,
-              borderWidth: 1,
-              borderColor: c.border,
+              flex: 1,
+              paddingVertical: 9,
+              borderRadius: RADIUS.sm,
+              backgroundColor: active ? c.surface : 'transparent',
+              alignItems: 'center',
+              shadowColor: c.shadow,
+              shadowOpacity: active && !c.dark ? 0.08 : 0,
+              shadowRadius: 6,
+              shadowOffset: { width: 0, height: 2 },
+              elevation: active && !c.dark ? 2 : 0,
             }}
           >
-            <Text style={[rtlText, { color: c.textMuted, fontSize: 12, fontWeight: '700', paddingHorizontal: 10, paddingVertical: 6 }]}>
-              اختر التصنيف
+            <Text
+              style={[rtlText, { color: active ? c.primaryText : c.textMuted, fontSize: options.length > 3 ? 11.5 : 13, fontWeight: '800', textAlign: 'center' }]}
+              numberOfLines={2}
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}
+            >
+              {o.label}
             </Text>
-            {options.map((o) => {
-              const active = o.value === value;
-              return (
-                <Pressable
-                  key={o.value}
-                  onPress={() => {
-                    onChange(o.value);
-                    setOpen(false);
-                  }}
-                  style={{
-                    flexDirection: 'row-reverse',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    paddingHorizontal: 12,
-                    paddingVertical: 12,
-                    borderRadius: RADIUS.md,
-                    backgroundColor: active ? c.primarySoft : 'transparent',
-                  }}
-                >
-                  <Text style={[rtlText, { color: active ? c.primaryText : c.text, fontSize: 14, fontWeight: active ? '800' : '600' }]}>
-                    {o.label}
-                  </Text>
-                  {active ? <Ionicons name="checkmark-circle" size={19} color={c.primary} /> : null}
-                </Pressable>
-              );
-            })}
-          </View>
-        </Pressable>
-      </Modal>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -1273,4 +1197,53 @@ export function Notice({
 
 export function usePaletteRef(): Palette {
   return usePalette();
+}
+
+export function ActionDropdown({ label = "خيارات وإجراءات", items }: { label?: string; items: { label: string; sub?: string; icon?: any; tone?: "default" | "primary" | "danger"; onPress: () => void; hidden?: boolean }[] }) {
+  const c = useThemeColors();
+  const [open, setOpen] = React.useState(false);
+  const list = items.filter((i) => !i.hidden);
+  return (
+    <View style={{ marginBottom: SPACING.lg }}>
+      <Pressable onPress={() => setOpen(true)} style={({ pressed }) => ({ flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between", backgroundColor: c.card, borderWidth: 1, borderColor: c.border, borderRadius: RADIUS.lg, paddingVertical: 14, paddingHorizontal: 16, opacity: pressed ? 0.85 : 1 })}>
+        <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 10 }}>
+          <Ionicons name="options-outline" size={20} color={c.primaryText} />
+          <Text style={{ color: c.text, fontSize: 15, fontWeight: "800" }}>{label}</Text>
+        </View>
+        <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 6 }}>
+          <Text style={{ color: c.textMuted, fontSize: 12 }}>{list.length} خيارات</Text>
+          <Ionicons name="chevron-down" size={18} color={c.textMuted} />
+        </View>
+      </Pressable>
+      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <Pressable onPress={() => setOpen(false)} style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" }}>
+          <Pressable onPress={(e) => e.stopPropagation()} style={{ backgroundColor: c.card, borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 18, paddingBottom: 28, maxHeight: "80%" }}>
+            <View style={{ flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: c.border }}>
+              <Text style={{ color: c.text, fontSize: 16, fontWeight: "800" }}>{label}</Text>
+              <Pressable onPress={() => setOpen(false)}><Ionicons name="close" size={22} color={c.textMuted} /></Pressable>
+            </View>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {list.map((it, i) => {
+                const col = it.tone === "danger" ? c.danger : it.tone === "primary" ? c.primaryText : c.text;
+                return (
+                  <Pressable key={i} onPress={() => { setOpen(false); setTimeout(() => it.onPress(), 120); }} style={({ pressed }) => ({ flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between", paddingVertical: 12, paddingHorizontal: 8, borderRadius: 12, backgroundColor: pressed ? c.bg : "transparent", borderBottomWidth: i < list.length - 1 ? 1 : 0, borderBottomColor: c.border })}>
+                    <View style={{ flexDirection: "row-reverse", alignItems: "center", gap: 12, flex: 1 }}>
+                      <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: it.tone === "danger" ? c.dangerSoft : c.primarySoft, alignItems: "center", justifyContent: "center" }}>
+                        <Ionicons name={it.icon || "ellipse-outline"} size={18} color={col} />
+                      </View>
+                      <View style={{ flex: 1, alignItems: "flex-end" }}>
+                        <Text style={{ color: col, fontSize: 14, fontWeight: "700" }}>{it.label}</Text>
+                        {it.sub ? <Text style={{ color: c.textMuted, fontSize: 11, marginTop: 2 }}>{it.sub}</Text> : null}
+                      </View>
+                    </View>
+                    <Ionicons name="chevron-back" size={16} color={c.textMuted} />
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </View>
+  );
 }

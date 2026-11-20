@@ -479,7 +479,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const next = { ...inv, paidAmount, remaining: round2(Math.max(0, inv.total - paidAmount)) };
         return { ...next, status: deriveInvoiceStatus(next) };
       }) : d.invoices;
-      const ledger = d.ledger.map((l) => l.voucherId === id ? { ...l, amount: amt, date: upd.date, description: patch.note ?? patch.notes ?? (l as any).description } : l);
+      const ledger = d.ledger.map((l) => l.voucherId === id ? { ...l, amount: amt, date: upd.date, description: patch.note ?? (l as any).description } : l);
       return { ...d, vouchers: d.vouchers.map((v) => (v.id === id ? upd : v)), invoices, ledger };
     });
   }, []);
@@ -510,13 +510,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const id = "imp_" + Date.now() + "_" + i, val = parseFloat((r[cAmt] || "0").replace(/[^0-9.-]/g, "")) || 0;
         const date = (cDate >= 0 && r[cDate]) ? r[cDate] : now, title = (cNote >= 0 && r[cNote]) ? r[cNote] : (cName >= 0 ? r[cName] : "مستورد");
         if (low.includes("voucher") || low.includes("سند") || hdr.some((h) => h.includes("نوع السند"))) {
-          next.vouchers.push({ id, number: (cNum >= 0 && r[cNum]) || ("V-" + (i + 1)), type: r.join(" ").includes("صرف") ? "payment" : "receipt", amount: val, date, paymentMethod: "cash", companyId: "", invoiceId: null, note: title, createdBy: d.currentUserId || "admin" } as any); count++;
+          next.vouchers.push({ id, number: (cNum >= 0 && r[cNum]) || ("V-" + (i + 1)), type: r.join(" ").includes("صرف") ? "payment" : "receipt", amount: val, date, method: "cash", companyId: "", invoiceId: null, note: title, createdBy: d.currentUserId || "admin" } as any); count++;
         } else if (low.includes("invoice") || low.includes("فاتور")) {
           next.invoices.push({ id, number: (cNum >= 0 && r[cNum]) || ("INV-" + (i + 1)), companyId: "", date, dueDate: date, items: [], subtotal: val, tax: 0, total: val, paidAmount: 0, remaining: val, status: "unpaid", notes: title, voucherIds: [], createdBy: d.currentUserId || "admin" } as any); count++;
         } else if ((low.includes("compan") || low.includes("عملا") || low.includes("شرك")) && cName >= 0 && r[cName]) {
           next.companies.push({ id, name: r[cName], phone: r[col("الهاتف", "جوال")] || "", email: "", address: "", notes: "", createdAt: date } as any); count++;
         } else if (val > 0) {
-          next.ledger.push({ id, type: r.join(" ").includes("مصروف") ? "expense" : "income", category: "مستورد", amount: val, date, note: title, voucherId: null, createdBy: d.currentUserId || "admin" } as any); count++;
+          next.ledger.push({ id, type: r.join(" ").includes("مصروف") ? "expense" : "income", category: "مستورد", amount: val, date, description: title, voucherId: null, createdBy: d.currentUserId || "admin" } as any); count++;
         }
       });
       return next;

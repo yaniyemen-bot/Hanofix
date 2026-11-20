@@ -15,7 +15,7 @@ import {
   MenuRow,
   Screen,
   ScreenHeader,
-  SectionHeader,
+  SectionHeader, ActionDropdown,
   rtlText,
 } from '../components/ui';
 import {
@@ -46,23 +46,18 @@ export default function VoucherDetailScreen() {
   const [editAmount, setEditAmount] = useState("");
   const [editDate, setEditDate] = useState("");
   const [editNote, setEditNote] = useState("");
-  const openEdit = () => { if (!can(role, "settings.edit")) { showToast("التعديل للمدير فقط", "error"); return; } setEditAmount(String(voucher.amount || "")); setEditDate(voucher.date || ""); setEditNote((voucher as any).note || (voucher as any).notes || ""); setEditOpen(true); };
-  const saveEdit = () => { const n = parseFloat(editAmount); if (!n || n <= 0) { showToast("أدخل مبلغاً صحيحاً", "error"); return; } updateVoucher(voucher.id, { amount: n, date: editDate.trim() || voucher.date, note: editNote.trim(), notes: editNote.trim() }); setEditOpen(false); showToast("تم تعديل السند وتحديث الأرصدة", "success"); };
-
+  const openEdit = () => { if (!can(role, "settings.edit")) { showToast("التعديل للمدير فقط", "error"); return; } setEditAmount(String(voucher!.amount || "")); setEditDate(voucher!.date || ""); setEditNote((voucher as any).note || ""); setEditOpen(true); };
+  const saveEdit = () => { const n = parseFloat(editAmount); if (!n || n <= 0) { showToast("أدخل مبلغاً صحيحاً", "error"); return; } updateVoucher(voucher!.id, { amount: n, date: editDate.trim() || voucher!.date, note: editNote.trim() }); setEditOpen(false); showToast("تم تعديل السند وتحديث الأرصدة", "success"); };
   const [busy, setBusy] = useState<string | null>(null);
 
   const voucher = vouchers.find((v) => v.id === route.params?.voucherId);
 
   if (!voucher) {
-    
-  
-
-  return (
+    return (
       <Screen>
         <ScreenHeader title="السند المالي" onBack={() => nav.goBack()} />
         <EmptyState icon="alert-circle-outline" title="السند غير موجود" body="ربما تم حذفه من حركة الصندوق" />
-      <Modal visible={editOpen} transparent animationType="fade" onRequestClose={() => setEditOpen(false)}><View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "center", padding: 20 }}><View style={{ backgroundColor: c.card, borderRadius: 16, padding: 18, borderWidth: 1, borderColor: c.border }}><Text style={{ color: c.text, fontSize: 17, fontWeight: "800", textAlign: "right", marginBottom: 12 }}>تعديل السند</Text><Text style={{ color: c.textMuted, fontSize: 12, textAlign: "right" }}>المبلغ</Text><TextInput value={editAmount} onChangeText={setEditAmount} keyboardType="numeric" style={{ borderWidth: 1, borderColor: c.border, borderRadius: 10, padding: 10, color: c.text, textAlign: "right", marginBottom: 10 }} /><Text style={{ color: c.textMuted, fontSize: 12, textAlign: "right" }}>التاريخ</Text><TextInput value={editDate} onChangeText={setEditDate} style={{ borderWidth: 1, borderColor: c.border, borderRadius: 10, padding: 10, color: c.text, textAlign: "right", marginBottom: 10 }} /><Text style={{ color: c.textMuted, fontSize: 12, textAlign: "right" }}>البيان</Text><TextInput value={editNote} onChangeText={setEditNote} multiline style={{ borderWidth: 1, borderColor: c.border, borderRadius: 10, padding: 10, color: c.text, textAlign: "right", minHeight: 60, marginBottom: 14 }} /><View style={{ flexDirection: "row-reverse", gap: 10 }}><View style={{ flex: 1 }}><Btn label="حفظ" onPress={saveEdit} /></View><View style={{ flex: 1 }}><Btn label="إلغاء" variant="outline" onPress={() => setEditOpen(false)} /></View></View></View></View></Modal>
-    </Screen>
+      </Screen>
     );
   }
 
@@ -116,7 +111,7 @@ export default function VoucherDetailScreen() {
     <Screen>
       <ScreenHeader
         title={voucherKindLabel(voucher)}
-        subtitle={`${voucher.number} • ${formatDate(voucher.date)}`}
+        subtitle={`${voucher.number} • ${formatDate(voucher!.date)}`}
         onBack={() => nav.goBack()}
         right={<Badge label={isReceipt ? 'قبض' : 'صرف'} tone={isReceipt ? 'success' : 'danger'} />}
       />
@@ -146,7 +141,7 @@ export default function VoucherDetailScreen() {
                 {isReceipt ? 'المبلغ المحصل' : 'المبلغ المصروف'}
               </Text>
               <Text style={[rtlText, { color: isReceipt ? c.success : c.danger, fontSize: 25, fontWeight: '800', marginTop: 4 }]}>
-                {formatMoney(voucher.amount, currency)}
+                {formatMoney(voucher!.amount, currency)}
               </Text>
               <Text style={[rtlText, { color: isReceipt ? c.success : c.danger, fontSize: 11.5, marginTop: 6, opacity: 0.85 }]}>
                 {PAYMENT_METHOD_LABELS[voucher.method]} • {voucher.number}
@@ -158,7 +153,7 @@ export default function VoucherDetailScreen() {
         <Card style={{ marginBottom: SPACING.lg }}>
           <InfoRow label={isReceipt ? 'استلمنا من' : 'صرفنا إلى'} value={voucher.partyName} icon="person-outline" onValuePress={voucher.partyId ? () => nav.navigate('CompanyDetail', { companyId: voucher.partyId }) : undefined} />
           <InfoRow label="البيان" value={voucher.reason} icon="text-outline" />
-          <InfoRow label="التاريخ" value={formatDate(voucher.date)} icon="calendar-outline" />
+          <InfoRow label="التاريخ" value={formatDate(voucher!.date)} icon="calendar-outline" />
           <InfoRow label="طريقة الدفع" value={PAYMENT_METHOD_LABELS[voucher.method]} icon="card-outline" />
           <InfoRow label="المرجع" value={voucher.reference} icon="bookmark-outline" />
           <InfoRow label="المسؤول" value={voucher.createdBy} icon="shield-checkmark-outline" />
@@ -176,50 +171,30 @@ export default function VoucherDetailScreen() {
           </Card>
         ) : null}
 
-        <SectionHeader title="طباعة واستخراج" icon="print-outline" />
-        <Card padded={false} style={{ overflow: 'hidden', marginBottom: SPACING.lg }}>
-          <MenuRow label="طباعة / PDF" icon="print-outline" onPress={doPrint} hint="يفتح نافذة الطباعة ويمكن الحفظ كـ PDF" />
-          {!isWeb ? <MenuRow label="حفظ ومشاركة PDF" icon="document-outline" onPress={doPdf} hint="ينشئ ملف PDF جاهز للإرسال" /> : null}
-          <MenuRow label="تصدير Excel" icon="grid-outline" onPress={doExcel} hint="ملف ‎.xls يفتح في Excel مباشرة" />
-          <MenuRow label="تصدير CSV" icon="download-outline" onPress={doCsv} hint="ملف جدول بيانات" />
-          <MenuRow label="مشاركة نصية" icon="chatbox-ellipses-outline" onPress={doShare} hint={isWeb ? 'نسخ تفاصيل السند' : 'إرسال عبر التطبيقات'} />
-        </Card>
-
-        <SectionHeader title="إجراءات" icon="flash-outline" />
-        <View style={{ gap: SPACING.md }}>
-          {isReceipt ? (
-            <Btn label="سند قبض جديد" icon="add" variant="secondary" onPress={() => nav.navigate('CashForm', { type: 'receipt' })} disabled={!can(role, 'cash.create')} />
-          ) : (
-            <Btn label="سند صرف جديد" icon="add" variant="secondary" onPress={() => nav.navigate('CashForm', { type: 'payment' })} disabled={!can(role, 'cash.create')} />
-          )}
-          <Btn
-            label="حذف السند"
-            icon="trash-outline"
-            variant="danger"
-            onPress={() => {
-              if (!can(role, 'cash.delete')) {
-                showToast('دورك الحالي لا يسمح بحذف السندات', 'error');
-                return;
-              }
-              setConfirmDelete(true);
-            }}
-          />
-          <Btn label="طباعة السند" icon="print-outline" variant="outline" loading={busy === "print"} onPress={doPrint} />
-          {can(role, "settings.edit") ? <Btn label="تعديل السند" icon="create-outline" variant="outline" onPress={openEdit} /> : null}
-          <Btn label="العودة لحركة الصندوق" icon="wallet-outline" variant="outline" onPress={() => nav.navigate('Cash')} />
-        </View>
+        <ActionDropdown label="خيارات السند والتصدير" items={[
+  { label: "طباعة / حفظ PDF", sub: "طباعة السند الرسمي بشعار الشركة", icon: "print-outline", onPress: doPrint },
+  { label: "حفظ PDF على الجهاز", sub: "تصدير ملف PDF مباشر", icon: "document-outline", onPress: doPdf, hidden: isWeb },
+  { label: "تصدير Excel (.xlsx)", sub: "فتح السند في جدول Excel", icon: "grid-outline", onPress: doExcel },
+  { label: "تصدير CSV", sub: "ملف جدول بيانات", icon: "download-outline", onPress: doCsv },
+  { label: "مشاركة نصية", sub: "نسخ أو مشاركة تفاصيل السند", icon: "chatbox-ellipses-outline", onPress: doShare },
+  { label: "تعديل بيانات السند", sub: "تعديل المبلغ أو التاريخ أو البيان", icon: "create-outline", onPress: openEdit, hidden: !can(role, "settings.edit") },
+  { label: isReceipt ? "سند قبض جديد" : "سند صرف جديد", sub: "إنشاء سند جديد", icon: "add-circle-outline", tone: "primary", onPress: () => nav.navigate("CashForm", { type: isReceipt ? "receipt" : "payment" }), hidden: !can(role, "cash.create") },
+  { label: "حذف السند", sub: "حذف السند وإعادة احتساب الأرصدة", icon: "trash-outline", tone: "danger", onPress: () => { if (!can(role, "cash.delete")) { showToast("الدور الحالي لا يسمح بحذف السند", "error"); return; } setConfirmDelete(true); } },
+]} />
+<Btn label="العودة لحركة الصندوق" icon="wallet-outline" variant="outline" onPress={() => nav.navigate("Cash")} />
       </ScrollView>
+<Modal visible={editOpen} transparent animationType="fade" onRequestClose={() => setEditOpen(false)}><View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "center", padding: 20 }}><View style={{ backgroundColor: c.card, borderRadius: 16, padding: 18 }}><Text style={{ color: c.text, fontSize: 17, fontWeight: "800", textAlign: "right", marginBottom: 12 }}>تعديل السند</Text><Text style={{ color: c.textMuted, fontSize: 12, textAlign: "right" }}>المبلغ</Text><TextInput value={editAmount} onChangeText={setEditAmount} keyboardType="numeric" style={{ borderWidth: 1, borderColor: c.border, borderRadius: 10, padding: 10, color: c.text, textAlign: "right", marginBottom: 10 }} /><Text style={{ color: c.textMuted, fontSize: 12, textAlign: "right" }}>التاريخ</Text><TextInput value={editDate} onChangeText={setEditDate} style={{ borderWidth: 1, borderColor: c.border, borderRadius: 10, padding: 10, color: c.text, textAlign: "right", marginBottom: 10 }} /><Text style={{ color: c.textMuted, fontSize: 12, textAlign: "right" }}>البيان</Text><TextInput value={editNote} onChangeText={setEditNote} multiline style={{ borderWidth: 1, borderColor: c.border, borderRadius: 10, padding: 10, color: c.text, textAlign: "right", minHeight: 60, marginBottom: 14 }} /><View style={{ flexDirection: "row-reverse", gap: 10 }}><View style={{ flex: 1 }}><Btn label="حفظ" onPress={saveEdit} /></View><View style={{ flex: 1 }}><Btn label="إلغاء" variant="outline" onPress={() => setEditOpen(false)} /></View></View></View></View></Modal>
 
       <ConfirmDialog
         visible={confirmDelete}
         title="حذف السند المالي"
-        body={`سيتم حذف ${voucherKindLabel(voucher)} ${voucher.number} بقيمة ${formatMoney(voucher.amount, currency)}${
+        body={`سيتم حذف ${voucherKindLabel(voucher)} ${voucher.number} بقيمة ${formatMoney(voucher!.amount, currency)}${
           voucher.invoiceId ? ' وسيُعاد احتساب المدفوع والمتبقي على الفاتورة المرتبطة' : ''
         }. هل أنت متأكد؟`}
         confirmLabel="حذف"
         onCancel={() => setConfirmDelete(false)}
         onConfirm={() => {
-          deleteVoucher(voucher.id);
+          deleteVoucher(voucher!.id);
           setConfirmDelete(false);
           showToast('تم حذف السند', 'info');
           nav.goBack();
