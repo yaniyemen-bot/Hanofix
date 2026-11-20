@@ -72,7 +72,7 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.primary} colors={[c.primary]} />}
     >
-      <LinearGradient colors={settings.businessName ? c.headerGradient : c.headerGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl, paddingBottom: SPACING.xxl, borderBottomLeftRadius: RADIUS.xl, borderBottomRightRadius: RADIUS.xl }}>
+      <LinearGradient colors={settings.businessName ? c.headerGradient : c.headerGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl, paddingBottom: SPACING.xl, borderBottomLeftRadius: RADIUS.xl, borderBottomRightRadius: RADIUS.xl }}>
         <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: SPACING.md }}>
           <View style={{ width: 46, height: 46, borderRadius: RADIUS.lg, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' }}>
             <Image source={require("../assets/logo.png")} style={{ width: 42, height: 28 }} resizeMode="contain" />
@@ -90,18 +90,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View style={{ flexDirection: 'row-reverse', gap: SPACING.sm, marginTop: SPACING.xl }}>
-          <QuickAction icon="add-circle" label="عمل يومي" onPress={() => nav.navigate('WorkForm')} />
-          {can(role, 'invoices.create') ? (
-            <QuickAction icon="document-text" label="فاتورة جديدة" onPress={() => nav.navigate('InvoiceNew')} />
-          ) : null}
-          {can(role, 'cash.view') ? (
-            <QuickAction icon="wallet" label={settings.labels.cash} onPress={() => nav.navigate('Cash')} />
-          ) : null}
-          <QuickAction icon="stats-chart" label={settings.labels.reports} onPress={() => (can(role, 'reports.view') ? nav.navigate('Reports') : showToast('دورك الحالي لا يسمح بعرض التقارير', 'error'))} />
-          <QuickAction icon="notifications" label={settings.labels.alerts} badge={alerts.filter((a) => a.severity !== 'info').length} onPress={() => nav.navigate('Alerts')} />
-        </View>
-      </LinearGradient>
+        </LinearGradient>
 
       <View style={{ padding: SPACING.lg, marginTop: -SPACING.lg }}>
         <View style={{ flexDirection: 'row-reverse', gap: SPACING.md }}>
