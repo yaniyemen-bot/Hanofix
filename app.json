@@ -8,10 +8,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.arcadalabs.bizinvoices"
+      "bundleIdentifier": "com.yaniyemen.hanofix"
     },
     "android": {
-      "package": "com.arcadalabs.bizinvoices",
+      "package": "com.yaniyemen.hanofix",
       "versionCode": 5,
       "softwareKeyboardLayoutMode": "resize",
       "permissions": [
