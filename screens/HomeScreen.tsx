@@ -104,7 +104,6 @@ export default function HomeScreen() {
       </LinearGradient>
 
       <View style={{ paddingHorizontal: SPACING.lg, marginTop: SPACING.md }}>
-        </Card>
 
         <SectionHeader title="أنشط العملاء هذا الشهر" icon="people-outline" />
         <Card>
