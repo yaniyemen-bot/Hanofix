@@ -442,7 +442,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createdBy: (d.users.find((u) => u.id === d.currentUserId) ?? d.users[0])?.name ?? 'المدير',
       createdAt: todayISO(),
     };
-    setData((prev) => ({ ...prev, vouchers: [voucher, ...prev.vouchers] }));
+    setData((prev) => {
+      const nextVouchers = [voucher, ...prev.vouchers];
+      const nextInvoices = voucher.invoiceId
+        ? prev.invoices.map((inv) => {
+            if (inv.id !== voucher.invoiceId) return inv;
+            const sumPaid = round2(
+              nextVouchers
+                .filter((x) => x.invoiceId === inv.id && x.type === 'receipt')
+                .reduce((s, x) => s + (Number(x.amount) || 0), 0)
+            );
+            const rem = round2(Math.max(0, (Number(inv.total) || 0) - sumPaid));
+            const nextStatus = rem <= 0 ? 'paid' : sumPaid > 0 ? 'partial' : inv.status;
+            return { ...inv, paidAmount: sumPaid, remaining: rem, status: nextStatus };
+          })
+        : prev.invoices;
+      return { ...prev, vouchers: nextVouchers, invoices: nextInvoices };
+    });
     dataRef.current = { ...dataRef.current, vouchers: [voucher, ...dataRef.current.vouchers] };
     return voucher;
   }, []);

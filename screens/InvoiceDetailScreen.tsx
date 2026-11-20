@@ -102,13 +102,14 @@ export default function InvoiceDetailScreen() {
   const company = companyById(invoice.companyId);
   const items = invoiceItems(invoice);
   const today = todayISO();
-  const remaining = invoiceRemaining(invoice);
-  const paidAmount = round2(Number(invoice.paidAmount) || 0);
-  const open = invoice.status === 'issued' || invoice.status === 'partial';
-  const overdueDays = open && remaining > 0 && invoice.dueDate < today ? Math.abs(daysBetween(invoice.dueDate, today)) : 0;
   const invoiceVouchers = vouchersOfInvoice(invoice.id);
-
-  const html = () => buildInvoiceHtml(invoice, company, works, settings, currency, currentUser.name);
+  const vouchersSum = round2(invoiceVouchers.reduce((s, v) => s + (Number(v.amount) || 0), 0));
+  const paidAmount = vouchersSum > 0 ? vouchersSum : round2(Number(invoice.paidAmount) || 0);
+  const remaining = round2(Math.max(0, (Number(invoice.total) || 0) - paidAmount));
+  const effectiveInvoice = { ...invoice, paidAmount, remaining };
+  const open = invoice.status === 'issued' || invoice.status === 'partial' || remaining > 0;
+  const overdueDays = open && remaining > 0 && invoice.dueDate < today ? Math.abs(daysBetween(invoice.dueDate, today)) : 0;
+  const html = () => buildInvoiceHtml(effectiveInvoice, company, works, settings, currency, currentUser.name);
 
   const doPrint = async () => {
     setBusy('print');
@@ -136,7 +137,7 @@ export default function InvoiceDetailScreen() {
 
   const doShare = async () => {
     setBusy('share');
-    const res = await shareText(buildInvoiceShareText(invoice, company, settings, currency, currentUser.name));
+    const res = await shareText(buildInvoiceShareText(effectiveInvoice, company, settings, currency, currentUser.name));
     setBusy(null);
     showToast(
       res === 'shared' ? 'تمت المشاركة' : res === 'copied' ? 'تم نسخ تفاصيل الفاتورة (المتصفح لا يدعم المشاركة المباشرة)' : 'تعذرت المشاركة',
@@ -276,7 +277,7 @@ export default function InvoiceDetailScreen() {
                 adjustsFontSizeToFit
                 minimumFontScale={0.55}
               >
-                {formatMoney(invoice.remaining, currency)}
+                {formatMoney(remaining, currency)}
               </Text>
               <Text style={[rtlText, { color: c.primaryText, fontSize: 11.5, marginTop: 6, opacity: 0.85, lineHeight: 17 }]} numberOfLines={2}>
                 {items.length} بند • {monthPeriod(invoice.periodStart, invoice.periodEnd)}
