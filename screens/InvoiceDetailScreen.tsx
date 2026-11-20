@@ -419,16 +419,16 @@ export default function InvoiceDetailScreen() {
         />
 
         <ActionDropdown label="خيارات الفاتورة والتصدير" items={[
-  { label: "طباعة / حفظ PDF", sub: "طباعة الفاتورة الرسمية أو حفظها PDF", icon: "print-outline", onPress: doPrint },
-  { label: "حفظ PDF على الجهاز", sub: "تصدير ملف PDF مباشر", icon: "document-outline", onPress: doPdf, hidden: isWeb },
-  { label: "تصدير Excel (.xlsx)", sub: "فتح الفاتورة في جدول Excel", icon: "grid-outline", onPress: doExcel },
-  { label: "تصدير CSV", sub: "ملف جدول بيانات", icon: "download-outline", onPress: doCsv },
-  { label: "مشاركة نصية", sub: "نسخ أو إرسال ملخص الفاتورة", icon: "chatbox-ellipses-outline", onPress: doShare },
-  { label: "تحديد كمدفوعة بالكامل", sub: "تسجيل المتبقي كمدفوع", icon: "checkmark-done-outline", tone: "primary", hidden: invoice.status === "paid", onPress: () => can(role, "invoices.edit") && changeStatus("paid") },
-  { label: "تغيير حالة الفاتورة", sub: `الحالة الحالية: ${STATUS_LABELS[invoice.status]}`, icon: "swap-horizontal-outline", onPress: () => can(role, "invoices.edit") && setStatusOpen(true) },
-  { label: "تعديل ملاحظات الفاتورة", sub: invoice.notes || "إضافة أو تعديل الملاحظات", icon: "create-outline", onPress: () => { if (!can(role, "invoices.edit")) { showToast("الدور الحالي لا يسمح بالتعديل", "error"); return; } setNotesDraft(invoice.notes); setNotesOpen(true); } },
-  { label: "حذف الفاتورة", sub: "حذف الفاتورة والبنود المرتبطة", icon: "trash-outline", tone: "danger", onPress: () => { if (!can(role, "invoices.delete")) { showToast("الدور الحالي لا يسمح بحذف الفاتورة", "error"); return; } setConfirmDelete(true); } },
-]} />
+          { label: "طباعة / حفظ PDF", sub: "طباعة الفاتورة الرسمية أو حفظها PDF", icon: "print-outline", onPress: doPrint },
+          { label: "حفظ PDF على الجهاز", sub: "تصدير ملف PDF مباشر", icon: "document-outline", onPress: doPdf, hidden: isWeb },
+          { label: "تصدير Excel (.xlsx)", sub: "فتح الفاتورة في جدول Excel", icon: "grid-outline", onPress: doExcel },
+          { label: "تصدير CSV", sub: "ملف جدول بيانات", icon: "download-outline", onPress: doCsv },
+          { label: "مشاركة نصية", sub: "نسخ أو إرسال ملخص الفاتورة", icon: "chatbox-ellipses-outline", onPress: doShare },
+          { label: "تحديد كمدفوعة بالكامل", sub: "تسجيل المتبقي كمدفوع", icon: "checkmark-done-outline", tone: "primary", hidden: invoice.status === "paid", onPress: () => can(role, "invoices.edit") && changeStatus("paid") },
+          { label: "تغيير حالة الفاتورة", sub: `الحالة الحالية: ${STATUS_LABELS[invoice.status]}`, icon: "swap-horizontal-outline", onPress: () => can(role, "invoices.edit") && setStatusOpen(true) },
+          { label: "تعديل ملاحظات الفاتورة", sub: invoice.notes || "إضافة أو تعديل الملاحظات", icon: "create-outline", onPress: () => { if (!can(role, "invoices.edit")) { showToast("الدور الحالي لا يسمح بالتعديل", "error"); return; } setNotesDraft(invoice.notes); setNotesOpen(true); } },
+          { label: "حذف الفاتورة", sub: "حذف الفاتورة والبنود المرتبطة", icon: "trash-outline", tone: "danger", onPress: () => { if (!can(role, "invoices.delete")) { showToast("الدور الحالي لا يسمح بحذف الفاتورة", "error"); return; } setConfirmDelete(true); } },
+        ]} />
 
         {!can(role, 'invoices.edit') ? (
           <View style={{ marginTop: SPACING.lg }}>
