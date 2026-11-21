@@ -396,21 +396,29 @@ export function buildVoucherHtml(voucher: Voucher, settings: Settings, currency:
 </head>
 <body>
 <div class="head" style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #524C6B;padding-bottom:18px;margin-bottom:20px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-  <div style="background:#524C6B;color:#ffffff;padding:16px 24px;border-radius:14px;display:flex;align-items:center;gap:18px;box-shadow:0 4px 10px rgba(82,76,107,0.18);">
-    <img src="${LOGO_DATA_URI}" style="height:64px;width:auto;max-width:130px;object-fit:contain;display:block;" />
-    <div style="border-right:1px solid rgba(255,255,255,0.28);padding-right:16px;">
-      <div style="font-size:19px;font-weight:800;color:#ffffff;margin-bottom:4px;">${escapeHtml(settings.businessName)}</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.92);line-height:1.6;">${escapeHtml(settings.address)}<br/>هاتف: ${escapeHtml(settings.phone)}</div>
+    <div style="background:#524C6B;color:#ffffff;padding:16px 24px;border-radius:14px;display:flex;align-items:center;gap:18px;box-shadow:0 4px 10px rgba(82,76,107,0.18);">
+      <img src="${LOGO_DATA_URI}" style="height:64px;width:auto;max-width:130px;object-fit:contain;display:block;" />
+      <div style="border-right:1px solid rgba(255,255,255,0.28);padding-right:16px;">
+        <div style="font-size:19px;font-weight:800;color:#ffffff;margin-bottom:4px;">${escapeHtml(settings.businessName)}</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.92);line-height:1.6;">${escapeHtml(settings.address)}<br/>هاتف: ${escapeHtml(settings.phone)}</div>
+      </div>
+    </div>
+    <div style="text-align:left;">
+      <h1 style="margin:0 0 8px 0;color:#524C6B;font-size:24px;font-weight:800;">${voucherKindLabel(voucher)}</h1>
+      <div class="num" style="font-size:13px;color:#475569;line-height:1.6;"><b>رقم السند: ${escapeHtml(voucher.number)}</b><br/>التاريخ: ${formatDateShort(voucher.date)}</div>
     </div>
   </div>
-  <div style="text-align:left;">
-    <h1 style="margin:0 0 8px 0;color:#524C6B;font-size:24px;font-weight:800;">فاتورة مبيعات</h1>
-    <div class="num" style="font-size:13px;color:#475569;line-height:1.6;"><b>رقم السند: ${escapeHtml(voucher.number)}</b><br/>النوع: ${voucherKindLabel(voucher)}</div>
+  <div class="amount" style="background:#524C6B;color:#ffffff;border-radius:12px;padding:16px;text-align:center;margin:16px 0;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+    <div style="font-size:12px;opacity:0.9;margin-bottom:4px;">المبلغ</div>
+    <div class="v" style="font-size:26px;font-weight:800;">${escapeHtml(formatMoney(voucher.amount, currency))}</div>
   </div>
-</div>
-    <tr><td class="k">طريقة الدفع</td><td>${PAYMENT_METHOD_LABELS[voucher.method] ?? 'نقدًا'}</td></tr>
-    <tr><td class="k">المرجع</td><td>${escapeHtml(voucher.reference || '—')}</td></tr>
-    <tr><td class="k">المسؤول</td><td>${escapeHtml(voucher.createdBy || '—')}</td></tr>
+  <table>
+    <tr><td class="k">${voucher.type === 'receipt' ? 'استلمنا من (العميل)' : 'صرفنا إلى (الجهة)'}</td><td><b>${escapeHtml(voucher.partyName || '-')}</b></td></tr>
+    <tr><td class="k">التاريخ</td><td>${formatDateShort(voucher.date)}</td></tr>
+    <tr><td class="k">البيان</td><td>${escapeHtml(voucher.reason || '-')}</td></tr>
+    <tr><td class="k">طريقة الدفع</td><td>${PAYMENT_METHOD_LABELS[voucher.method] ?? 'نقداً'}</td></tr>
+    <tr><td class="k">المرجع / الفاتورة</td><td>${escapeHtml(voucher.reference || '-')}</td></tr>
+    <tr><td class="k">المسؤول</td><td>${escapeHtml(voucher.createdBy || '-')}</td></tr>
     ${voucher.notes ? `<tr><td class="k">ملاحظات</td><td>${escapeHtml(voucher.notes)}</td></tr>` : ''}
   </table>
   <div class="sign"><div>توقيع المستلم</div><div>توقيع المسؤول</div></div>
